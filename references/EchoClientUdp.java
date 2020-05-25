@@ -1,5 +1,3 @@
-package src;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -30,7 +28,6 @@ public class EchoClientUdp {
     public void close() {
         socket.close();
     }
-
 
     public static void main(String[] args) {
         boolean exit = false;

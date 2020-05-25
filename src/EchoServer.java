@@ -1,5 +1,3 @@
-package src;
-
 import java.net.*;
 import java.io.*;
 import java.time.LocalDateTime;
@@ -14,17 +12,17 @@ public class EchoServer {
     static String[] arrayResp = new String[]{"Bom dia", "bem disposto", "ola", "boas"};
 
     public static String listar() {
-        return arrayResp[0] + "," + arrayResp[1] + "," + arrayResp[2] + "," + arrayResp[3];
+        return arrayResp[0] + "," + arrayResp[1] + "," + arrayResp[2] + "," + arrayResp[3] + " - TCP";
     }
 
     public static String frase() {
-        return arrayResp[rand.nextInt(4)];
+        return arrayResp[rand.nextInt(4)] + " - TCP";
     }
 
     public static String horas() {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
-        return dtf.format(now);
+        return dtf.format(now) + " - TCP";
     }
 
     public static void main(String args[]) throws Exception {

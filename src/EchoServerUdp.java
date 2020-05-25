@@ -1,5 +1,3 @@
-package src;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -16,7 +14,7 @@ public class EchoServerUdp extends Thread {
     private byte[] buf = new byte[256];
  
     public EchoServerUdp() throws SocketException {
-        socket = new DatagramSocket(4445);
+        socket = new DatagramSocket(9031);
     }
 
     static Random rand = new Random();

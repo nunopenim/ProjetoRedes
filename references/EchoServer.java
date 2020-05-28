@@ -26,9 +26,6 @@ public class EchoServer {
     }
 
     public static void main(String args[]) throws Exception {
-        //criar socket na porta 6500
-
-
         ServerSocket server = new ServerSocket(6500);
         System.out.println ("servidor iniciado no porto 6500");
         Socket socket = null;

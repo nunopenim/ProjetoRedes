@@ -18,7 +18,7 @@ public class Servidor {
             ServerSocket server = null;
             try {
                 server = new ServerSocket(serverPort);
-                System.out.println("servidor iniciado no porto 6500");
+                System.out.println("Servidor TCP instânciado na porta " + serverPort);
                 Socket socket = null;
                 //aguarda mensagens
                 while (true) {
@@ -40,14 +40,16 @@ public class Servidor {
         private DatagramSocket socket;
         private boolean running;
         private byte[] buf = new byte[256];
+        private int port;
 
         public UDPServer(int port) throws SocketException {
             socket = new DatagramSocket(port);
+            this.port = port;
         }
 
         public void run() {
             running = true;
-
+            System.out.println("Servidor UDP instânciado na porta " + port);
             while (running) {
                 try {
                     Arrays.fill(buf, (byte) 0);

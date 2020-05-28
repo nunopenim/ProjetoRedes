@@ -81,9 +81,9 @@ public class Servidor {
     }
 
     public static void main(String[] args) throws SocketException {
-        Thread teste1 = new Thread(new TCPServer(6500));
-        Thread teste2 = new Thread(new UDPServer(9031));
-        teste1.start();
-        teste2.start();
+        Thread servidorTCP = new Thread(new TCPServer(6500));
+        Thread servidorUDP = new Thread(new UDPServer(9031));
+        servidorTCP.start();
+        servidorUDP.start();
     }
 }

@@ -6,6 +6,8 @@ import java.net.*;
 
 public class Cliente {
 
+    public static final String ENDCONNECTION = "Servidor.fim\n";
+
     public static boolean isNumber(String s) {
         try{
             int number = Integer.parseInt(s);
@@ -164,7 +166,7 @@ public class Cliente {
                 ligTCP.textToSend = s;
                 ligTCP.run();
             }
-            if (ligTCP.recieved.equals("Servidor.fim")) { //server-side end connection
+            if (ligTCP.recieved.equals(ENDCONNECTION)) { //server-side end connection
                 System.out.println("A sair");
                 System.out.println("Cliente desconectado...");
                 exit = true;

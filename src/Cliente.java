@@ -157,6 +157,8 @@ public class Cliente {
                 ligTCP.run();
             }
             if (ligTCP.recieved.equals("Servidor.fim")) { //server-side end connection
+                System.out.println("A sair");
+                System.out.println("Cliente desconectado...");
                 exit = true;
             }
             else {

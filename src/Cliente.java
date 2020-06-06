@@ -26,43 +26,50 @@ public class Cliente {
         }
     }
 
-    public static class TCPConnection implements Runnable {
+    public static class TCPConnection implements Runnable{
 
         String hostname;
         int portNumber;
+        Socket socket;
+        String previous = null;
+        String textToSend = "Connected!";
 
         TCPConnection(String host, int port) {
             this.hostname = host;
             this.portNumber = port;
         }
 
+        public void open() throws IOException {
+            socket = new Socket(hostname, portNumber);
+        }
+
+        public void send(String s) throws IOException {
+            PrintStream ps = new PrintStream(socket.getOutputStream());
+            ps.println(s);
+        }
+
+        public String recieve() throws IOException {
+            BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            return br.readLine();
+        }
+
+        public void close() throws IOException {
+            socket.close();
+        }
+
         public void run() {
-            boolean openConnection = true;
-            String endConnection = "Servidor.fim";
-            while(openConnection) {
-                try {
-                    Socket socket = new Socket(hostname, portNumber);
-                    BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-                    String s = null;
-                    s = bufferRead.readLine();
-                    BufferedReader br = null;
-                    br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    PrintStream ps = null;
-                    ps = new PrintStream(socket.getOutputStream());
-                    ps.println(s);
-                    String received = null;
-                    received = br.readLine();
-                    if(endConnection.equals(received)) {
-                        openConnection = false;
-                    }
-                    else {
-                        Thread printing = new Thread(new PrintingThread(received));
-                        printing.start();
-                    }
-                    socket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+            try {
+                if(!(this.textToSend.equals(previous))) {
+                    this.send(textToSend);
+                    this.previous = textToSend;
                 }
+                String recieved = this.recieve();
+                if (recieved.equals("Servidor.fim")) { //terminar ligação
+                    this.close();
+                }
+            }
+            catch (IOException e){
+                e.printStackTrace();
             }
         }
     }
@@ -132,11 +139,10 @@ public class Cliente {
     }
 
     public static void main(String[] args) throws IOException {
-        /*Thread teste1 = new Thread(new UDPConnection("localhost", 9031));
-        Thread teste2 = new Thread(new TCPConnection("localhost", 6500));
-        teste1.start();
-        teste2.start();*/
-        int option = 0;
+        //Thread teste1 = new Thread(new UDPConnection("localhost", 9031));
+        TCPConnection ligTCP = new TCPConnection("localhost", 6500);
+        ligTCP.open();
+
         boolean exit = false;
         menu();
         while(!exit){
@@ -144,25 +150,25 @@ public class Cliente {
             System.out.print("Opção? ");
             BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
             String s = bufferRead.readLine();
-            if ("0".equals(s)) {
+            if ("0".equals(s)) { //mostrar menu
                 menu();
             }
-            else if ("1".equals(s)) {
+            else if ("1".equals(s)) { //users online
                 //todo
             }
-            else if ("2".equals(s)) {
+            else if ("2".equals(s)) { //msg para user
                 //todo
             }
-            else if ("3".equals(s)) {
+            else if ("3".equals(s)) { //msg para todos
                 //todo
             }
-            else if ("4".equals(s)) {
+            else if ("4".equals(s)) { //whitelist
                 //todo
             }
-            else if ("5".equals(s)) {
+            else if ("5".equals(s)) { //blacklist
                 //todo
             }
-            else if ("99".equals(s)) {
+            else if ("99".equals(s)) { //exit
                 exit = true;
             }
             else {

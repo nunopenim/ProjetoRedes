@@ -7,6 +7,8 @@ import java.util.Arrays;
 
 public class Servidor {
 
+    public static final String ENDCONNECTION = "Servidor.fim";
+
     public static class TCPServer implements Runnable {
         int serverPort;
 
@@ -26,8 +28,11 @@ public class Servidor {
                     BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     PrintStream ps = new PrintStream(socket.getOutputStream());
                     String linha = br.readLine();
-                    String ret = "TCP";
-                    ps.println(ret + " - " + linha);
+                    String ret = "TCP - " +linha;
+                    if(linha.equals("99")) {
+                        ret = ENDCONNECTION;
+                    }
+                    ps.println(ret);
                     socket.close();
                 }
             } catch (IOException e) {
@@ -82,8 +87,8 @@ public class Servidor {
 
     public static void main(String[] args) throws SocketException {
         Thread servidorTCP = new Thread(new TCPServer(6500));
-        Thread servidorUDP = new Thread(new UDPServer(9031));
+        //Thread servidorUDP = new Thread(new UDPServer(9031));
         servidorTCP.start();
-        servidorUDP.start();
+        //servidorUDP.start();
     }
 }

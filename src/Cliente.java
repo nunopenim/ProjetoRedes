@@ -148,7 +148,7 @@ public class Cliente {
             System.out.print("Opção? ");
             BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
             String s = bufferRead.readLine();
-            if ("0".equals(s)) { //mostrar menu
+            if ("0".equals(s)) { //mostrar menu, continuar
                 menu();
                 continue;
             }
@@ -156,7 +156,7 @@ public class Cliente {
                 ligTCP.textToSend = s;
                 ligTCP.run();
             }
-            if (ligTCP.recieved.equals("Servidor.fim")) {
+            if (ligTCP.recieved.equals("Servidor.fim")) { //server-side end connection
                 exit = true;
             }
             else {

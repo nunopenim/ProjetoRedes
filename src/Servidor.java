@@ -1,9 +1,7 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.*;
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class Servidor {
 
@@ -55,16 +53,38 @@ public class Servidor {
                             //UDPThread aqui
                             break;
                         case "4":
-                            //mostrar whitelist
+                            try {
+                                ret = "";
+                                File myObj = new File("files/whitelist.txt");
+                                Scanner myReader = new Scanner(myObj);
+                                while (myReader.hasNextLine()) {
+                                    String data = myReader.nextLine();
+                                    ret += data + "\n";
+                                }
+                                myReader.close();
+                            } catch (FileNotFoundException e) {
+                                ret = "The whitelist file doesn't exist on this server!";
+                            }
                             break;
                         case "5":
-                            //mostrar blacklist
+                            try {
+                                ret = "";
+                                File myObj = new File("files/blacklist.txt");
+                                Scanner myReader = new Scanner(myObj);
+                                while (myReader.hasNextLine()) {
+                                    String data = myReader.nextLine();
+                                    ret += data + System.getProperty("line.separator");
+                                }
+                                myReader.close();
+                            } catch (FileNotFoundException e) {
+                                ret = "The blacklist file doesn't exist on this server!";
+                            }
                             break;
                         default:
                             ret = "Opção inválida!";
                             break;
                     }
-                    ps.println(ret);
+                    ps.print(ret);
                     socket.close();
                 }
 

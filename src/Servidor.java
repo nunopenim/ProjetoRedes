@@ -7,6 +7,8 @@ import java.util.Arrays;
 
 public class Servidor {
 
+    public static TCPServer[] TCPThreads = new TCPServer[10];
+
     public static final String ENDCONNECTION = "Servidor.fim";
 
     public static class TCPServer implements Runnable {
@@ -15,8 +17,6 @@ public class Servidor {
         public TCPServer(int port) {
             this.serverPort = port;
         }
-
-
 
         public void run() {
             ServerSocket server = null;
@@ -30,12 +30,13 @@ public class Servidor {
                     BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     PrintStream ps = new PrintStream(socket.getOutputStream());
                     String linha = br.readLine();
-                    System.out.println(linha);
-                    String ret = "TCP - " + linha;
+                    System.out.println("Diagnostics: " + linha + " was recieved");
+                    String ret = "Ping!";
                     if(linha.equals("99")) {
                         ret = ENDCONNECTION;
                         loop = false;
                     }
+
                     ps.println(ret);
                     socket.close();
                 }
@@ -91,9 +92,20 @@ public class Servidor {
     }
 
     public static void main(String[] args) throws SocketException {
-        Thread servidorTCP = new Thread(new TCPServer(6500));
-        //Thread servidorUDP = new Thread(new UDPServer(9031));
-        servidorTCP.start();
-        //servidorUDP.start();
+        TCPThreads[0] = new TCPServer(6500);
+        Thread[] threadsTCP = new Thread[TCPThreads.length];
+        for (int i = 0; i < TCPThreads.length; i++) {
+            if (TCPThreads[i] != null) {
+                threadsTCP[i] = new Thread(TCPThreads[i]);
+            }
+            else {
+                threadsTCP[i] = null;
+            }
+        }
+        for(Thread t : threadsTCP) {
+            if (t != null) {
+                t.start();
+            }
+        }
     }
 }

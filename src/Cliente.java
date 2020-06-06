@@ -16,15 +16,6 @@ public class Cliente {
         return true;
     }
 
-    public static boolean isValueInArray(int valToCheck, int[] array){
-        for (int val : array) {
-            if (val == valToCheck) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public static class PrintingThread implements Runnable {
         String text;
         public PrintingThread(String text) {
@@ -129,32 +120,15 @@ public class Cliente {
 
     }
 
-    public static int menu() throws IOException {
-        boolean invalid = true;
-        int option = 0;
-        int optionsArray[] = {0, 1, 2, 3, 4, 5, 99};
-        while (invalid) {
-            System.out.println("MENU CLIENTE\n");
-            System.out.println("0 - Menu Inicial");
-            System.out.println("1 - Listar utilizadores online");
-            System.out.println("2 - Enviar mensagem a um utilizador");
-            System.out.println("3 - Enviar mensagem a todos os utilizadores");
-            System.out.println("4 - Lista branca de utilizadores");
-            System.out.println("5 - Lista negra de utilizadores");
-            System.out.println("99 - Sair");
-            BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-            String s = null;
-            s = bufferRead.readLine();
-            if (isNumber(s) && isValueInArray(Integer.parseInt(s), optionsArray)) {
-                option = Integer.parseInt(s);
-                invalid = false;
-            }
-            else {
-                System.out.println("Opção inválida!");
-                invalid = true;
-            }
-        }
-        return option;
+    public static void menu() throws IOException {
+        System.out.println("MENU CLIENTE\n");
+        System.out.println("0 - Menu Inicial");
+        System.out.println("1 - Listar utilizadores online");
+        System.out.println("2 - Enviar mensagem a um utilizador");
+        System.out.println("3 - Enviar mensagem a todos os utilizadores");
+        System.out.println("4 - Lista branca de utilizadores");
+        System.out.println("5 - Lista negra de utilizadores");
+        System.out.println("99 - Sair");
     }
 
     public static void main(String[] args) throws IOException {
@@ -162,10 +136,40 @@ public class Cliente {
         Thread teste2 = new Thread(new TCPConnection("localhost", 6500));
         teste1.start();
         teste2.start();*/
+        int option = 0;
+        boolean exit = false;
         menu();
+        while(!exit){
+            System.out.println();
+            System.out.print("Opção? ");
+            BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+            String s = bufferRead.readLine();
+            if ("0".equals(s)) {
+                menu();
+            }
+            else if ("1".equals(s)) {
+                //todo
+            }
+            else if ("2".equals(s)) {
+                //todo
+            }
+            else if ("3".equals(s)) {
+                //todo
+            }
+            else if ("4".equals(s)) {
+                //todo
+            }
+            else if ("5".equals(s)) {
+                //todo
+            }
+            else if ("99".equals(s)) {
+                exit = true;
+            }
+            else {
+                System.out.println("Opção inválida!");
+            }
+        }
     }
-
-
 }
 
 

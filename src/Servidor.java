@@ -36,7 +36,7 @@ public class Servidor {
                         ret = ENDCONNECTION;
                         loop = false;
                     }
-                    if (linha.equals("1")) {
+                    else if (linha.equals("1")) {
                         int count = 0;
                         ret = "";
                         for (TCPServer t : TCPThreads) {
@@ -46,6 +46,21 @@ public class Servidor {
                                 count++;
                             }
                         }
+                    }
+                    else if (linha.equals("2")) {
+                        //UDPThread aqui
+                    }
+                    else if (linha.equals("3")) {
+                        //UDPThread aqui
+                    }
+                    else if (linha.equals("4")) {
+                        //mostrar whitelist
+                    }
+                    else if (linha.equals("5")) {
+                        //mostrar blacklist
+                    }
+                    else {
+                        ret = "Opção inválida!";
                     }
                     ps.println(ret);
                     socket.close();

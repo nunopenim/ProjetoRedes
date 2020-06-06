@@ -50,7 +50,15 @@ public class Cliente {
 
         public String recieve() throws IOException {
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            return br.readLine();
+            String line = null;
+            String text = "";
+            while ((line = br.readLine()) != null) {
+                if (line.isEmpty()) {
+                    break;
+                }
+                text += line + "\n";
+            }
+            return text;
         }
 
         public void close() throws IOException {
@@ -162,7 +170,7 @@ public class Cliente {
                 exit = true;
             }
             else {
-                System.out.println(ligTCP.recieved);
+                System.out.print(ligTCP.recieved);
             }
         }
     }

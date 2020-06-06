@@ -22,19 +22,22 @@ public class Servidor {
                 server = new ServerSocket(serverPort);
                 System.out.println("Servidor TCP instânciado na porta " + serverPort);
                 Socket socket = null;
-                //aguarda mensagens
-                while (true) {
+                boolean loop = true;
+                while (loop) {
                     socket = server.accept();
                     BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     PrintStream ps = new PrintStream(socket.getOutputStream());
                     String linha = br.readLine();
+                    System.out.println(linha);
                     String ret = "TCP - " +linha;
                     if(linha.equals("99")) {
                         ret = ENDCONNECTION;
+                        loop = false;
                     }
                     ps.println(ret);
                     socket.close();
                 }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -33,6 +33,7 @@ public class Cliente {
         Socket socket;
         String previous = null;
         String textToSend = "Connected!";
+        String recieved = null;
 
         TCPConnection(String host, int port) {
             this.hostname = host;
@@ -59,14 +60,16 @@ public class Cliente {
 
         public void run() {
             try {
+                this.open();
                 if(!(this.textToSend.equals(previous))) {
                     this.send(textToSend);
                     this.previous = textToSend;
                 }
-                String recieved = this.recieve();
+                recieved = this.recieve();
                 if (recieved.equals("Servidor.fim")) { //terminar ligação
                     this.close();
                 }
+                this.close();
             }
             catch (IOException e){
                 e.printStackTrace();
@@ -141,8 +144,7 @@ public class Cliente {
     public static void main(String[] args) throws IOException {
         //Thread teste1 = new Thread(new UDPConnection("localhost", 9031));
         TCPConnection ligTCP = new TCPConnection("localhost", 6500);
-        ligTCP.open();
-
+        //Thread TCPThread = new Thread(ligTCP);
         boolean exit = false;
         menu();
         while(!exit){
@@ -154,21 +156,33 @@ public class Cliente {
                 menu();
             }
             else if ("1".equals(s)) { //users online
-                //todo
+                ligTCP.textToSend = s;
+                ligTCP.run();
+                System.out.println(ligTCP.recieved);
             }
             else if ("2".equals(s)) { //msg para user
-                //todo
+                ligTCP.textToSend = s;
+                ligTCP.run();
+                System.out.println(ligTCP.recieved);
             }
             else if ("3".equals(s)) { //msg para todos
-                //todo
+                ligTCP.textToSend = s;
+                ligTCP.run();
+                System.out.println(ligTCP.recieved);
             }
             else if ("4".equals(s)) { //whitelist
-                //todo
+                ligTCP.textToSend = s;
+                ligTCP.run();
+                System.out.println(ligTCP.recieved);
             }
             else if ("5".equals(s)) { //blacklist
-                //todo
+                ligTCP.textToSend = s;
+                ligTCP.run();
+                System.out.println(ligTCP.recieved);
             }
             else if ("99".equals(s)) { //exit
+                ligTCP.textToSend = s;
+                ligTCP.run();
                 exit = true;
             }
             else {

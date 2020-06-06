@@ -13,6 +13,7 @@ public class Servidor {
 
     public static class TCPServer implements Runnable {
         int serverPort;
+        Socket socket = null;
 
         public TCPServer(int port) {
             this.serverPort = port;
@@ -23,7 +24,6 @@ public class Servidor {
             try {
                 server = new ServerSocket(serverPort);
                 System.out.println("Servidor TCP instânciado na porta " + serverPort);
-                Socket socket = null;
                 boolean loop = true;
                 while (loop) {
                     socket = server.accept();
@@ -36,7 +36,17 @@ public class Servidor {
                         ret = ENDCONNECTION;
                         loop = false;
                     }
-
+                    if (linha.equals("1")) {
+                        int count = 0;
+                        ret = "";
+                        for (TCPServer t : TCPThreads) {
+                            if (t != null && t.socket != null) {
+                                String ip=(((InetSocketAddress) t.socket.getRemoteSocketAddress()).getAddress()).toString().replace("/","");
+                                ret += count + " - " + ip;
+                                count++;
+                            }
+                        }
+                    }
                     ps.println(ret);
                     socket.close();
                 }

@@ -32,35 +32,37 @@ public class Servidor {
                     String linha = br.readLine();
                     System.out.println("Diagnostics: " + linha + " was recieved");
                     String ret = "Ping!";
-                    if(linha.equals("99")) {
-                        ret = ENDCONNECTION;
-                        loop = false;
-                    }
-                    else if (linha.equals("1")) {
-                        int count = 0;
-                        ret = "";
-                        for (TCPServer t : TCPThreads) {
-                            if (t != null && t.socket != null) {
-                                String ip=(((InetSocketAddress) t.socket.getRemoteSocketAddress()).getAddress()).toString().replace("/","");
-                                ret += count + " - " + ip;
-                                count++;
+                    switch (linha) {
+                        case "99":
+                            ret = ENDCONNECTION;
+                            loop = false;
+                            break;
+                        case "1":
+                            int count = 0;
+                            ret = "";
+                            for (TCPServer t : TCPThreads) {
+                                if (t != null && t.socket != null) {
+                                    String ip = (((InetSocketAddress) t.socket.getRemoteSocketAddress()).getAddress()).toString().replace("/", "");
+                                    ret += count + " - " + ip;
+                                    count++;
+                                }
                             }
-                        }
-                    }
-                    else if (linha.equals("2")) {
-                        //UDPThread aqui
-                    }
-                    else if (linha.equals("3")) {
-                        //UDPThread aqui
-                    }
-                    else if (linha.equals("4")) {
-                        //mostrar whitelist
-                    }
-                    else if (linha.equals("5")) {
-                        //mostrar blacklist
-                    }
-                    else {
-                        ret = "Opção inválida!";
+                            break;
+                        case "2":
+                            //UDPThread aqui
+                            break;
+                        case "3":
+                            //UDPThread aqui
+                            break;
+                        case "4":
+                            //mostrar whitelist
+                            break;
+                        case "5":
+                            //mostrar blacklist
+                            break;
+                        default:
+                            ret = "Opção inválida!";
+                            break;
                     }
                     ps.println(ret);
                     socket.close();

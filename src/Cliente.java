@@ -31,7 +31,6 @@ public class Cliente {
         String hostname;
         int portNumber;
         Socket socket;
-        String previous = null;
         String textToSend = "Connected!";
         String recieved = null;
 
@@ -61,10 +60,7 @@ public class Cliente {
         public void run() {
             try {
                 this.open();
-                if(!(this.textToSend.equals(previous))) {
-                    this.send(textToSend);
-                    this.previous = textToSend;
-                }
+                this.send(textToSend);
                 recieved = this.recieve();
                 if (recieved.equals("Servidor.fim")) { //terminar ligação
                     this.close();
@@ -154,39 +150,17 @@ public class Cliente {
             String s = bufferRead.readLine();
             if ("0".equals(s)) { //mostrar menu
                 menu();
+                continue;
             }
-            else if ("1".equals(s)) { //users online
+            else {
                 ligTCP.textToSend = s;
                 ligTCP.run();
-                System.out.println(ligTCP.recieved);
             }
-            else if ("2".equals(s)) { //msg para user
-                ligTCP.textToSend = s;
-                ligTCP.run();
-                System.out.println(ligTCP.recieved);
-            }
-            else if ("3".equals(s)) { //msg para todos
-                ligTCP.textToSend = s;
-                ligTCP.run();
-                System.out.println(ligTCP.recieved);
-            }
-            else if ("4".equals(s)) { //whitelist
-                ligTCP.textToSend = s;
-                ligTCP.run();
-                System.out.println(ligTCP.recieved);
-            }
-            else if ("5".equals(s)) { //blacklist
-                ligTCP.textToSend = s;
-                ligTCP.run();
-                System.out.println(ligTCP.recieved);
-            }
-            else if ("99".equals(s)) { //exit
-                ligTCP.textToSend = s;
-                ligTCP.run();
+            if (ligTCP.recieved.equals("Servidor.fim")) {
                 exit = true;
             }
             else {
-                System.out.println("Opção inválida!");
+                System.out.println(ligTCP.recieved);
             }
         }
     }

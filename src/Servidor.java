@@ -16,6 +16,8 @@ public class Servidor {
             this.serverPort = port;
         }
 
+
+
         public void run() {
             ServerSocket server = null;
             try {
@@ -29,7 +31,7 @@ public class Servidor {
                     PrintStream ps = new PrintStream(socket.getOutputStream());
                     String linha = br.readLine();
                     System.out.println(linha);
-                    String ret = "TCP - " +linha;
+                    String ret = "TCP - " + linha;
                     if(linha.equals("99")) {
                         ret = ENDCONNECTION;
                         loop = false;

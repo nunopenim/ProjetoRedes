@@ -22,8 +22,7 @@ public class Servidor {
             try {
                 server = new ServerSocket(serverPort);
                 System.out.println("Servidor TCP instânciado na porta " + serverPort);
-                boolean loop = true;
-                while (loop) {
+                while (true) {
                     socket = server.accept();
                     BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     PrintStream ps = new PrintStream(socket.getOutputStream());
@@ -33,7 +32,6 @@ public class Servidor {
                     switch (linha) {
                         case "99":
                             ret = ENDCONNECTION;
-                            loop = false;
                             break;
                         case "1":
                             int count = 0;

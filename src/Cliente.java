@@ -79,6 +79,8 @@ public class Cliente {
         private InetAddress address;
         private int port;
 
+        public String messg;
+
         private byte[] buf;
 
         public UDPConnection(String address, int port) throws SocketException, UnknownHostException {
@@ -88,12 +90,15 @@ public class Cliente {
             this.port = port;
         }
 
-        public String sendEcho(String msg) throws IOException {
+        public void sendEcho(String msg) throws IOException {
             buf = msg.getBytes();
             DatagramPacket packet = new DatagramPacket(buf, buf.length, address, this.port);
             socket.send(packet);
+        }
+
+        public String recieveEcho() throws IOException {
             byte[] recBuf = new byte[256];
-            packet = new DatagramPacket(recBuf, recBuf.length);
+            DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
             socket.receive(packet);
             String received = new String(packet.getData(), 0, packet.getLength());
             return received;
@@ -104,24 +109,17 @@ public class Cliente {
         }
 
         public void run() {
-            boolean exit = false;
-            while (!exit) {
-                try {
-                    UDPConnection client = new UDPConnection(hostname, port);
-                    BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-                    String s = bufferRead.readLine();
-                    Thread printing = new Thread(new PrintingThread(client.sendEcho(s)));
-                    printing.start();
-                    if ("tchau".equals(s)) {
-                        exit = true;
-                    }
-                } catch (SocketException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            try {
+                UDPConnection client = new UDPConnection(hostname, port);
+                String messageRec = client.recieveEcho();
+                System.out.println(messageRec);
+            } catch (SocketException e) {
+                e.printStackTrace();
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            close();
         }
 
     }

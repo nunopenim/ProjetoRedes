@@ -103,36 +103,60 @@ public class Servidor {
             this.port = port;
         }
 
-        public void run() {
-            running = true;
-            System.out.println("Servidor UDP instânciado na porta " + port);
-            while (running) {
-                try {
-                    Arrays.fill(buf, (byte) 0);
-                    DatagramPacket packet = new DatagramPacket(buf, buf.length);
-                    socket.receive(packet);
-                    InetAddress address = packet.getAddress();
-                    int port = packet.getPort();
-                    packet = new DatagramPacket(buf, buf.length, address, port);
-                    String received = new String(packet.getData(), packet.getOffset(), packet.getLength());
-                    int counter = 0;
-                    while (counter < packet.getData().length && packet.getData()[counter] != 0) {
-                        counter++;
-                    }
-                    received = received.substring(0, counter);
-                    String ret = "UDP - " + received;
-                    byte[] retBuf = new byte[256];
-                    retBuf = ret.getBytes();
-                    packet = new DatagramPacket(retBuf, retBuf.length, address, port);
-                    socket.send(packet);
-                } catch (SocketException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        public void close() {
+            socket.close();
+        }
 
-                socket.close();
+        public String recievedStr() {
+            try {
+                Arrays.fill(buf, (byte) 0);
+                DatagramPacket packet = new DatagramPacket(buf, buf.length);
+                socket.receive(packet);
+                InetAddress address = packet.getAddress();
+                int port = packet.getPort();
+                packet = new DatagramPacket(buf, buf.length, address, port);
+                String received = new String(packet.getData(), packet.getOffset(), packet.getLength());
+                int counter = 0;
+                while (counter < packet.getData().length && packet.getData()[counter] != 0) {
+                    counter++;
+                }
+                received = received.substring(0, counter) + "|" + address.toString() + "|" + port; //recieved tem de ter mensagem + destino
+                return received;
+            } catch (SocketException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+            return null;
+        }
+
+        public void send(String data, String address, int porta) {
+            try{
+                byte[] retBuf = new byte[256];
+                retBuf = data.getBytes();
+                DatagramPacket packet = new DatagramPacket(retBuf, retBuf.length, InetAddress.getByName(address), porta);
+                socket.send(packet);
+            } catch (SocketException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void run() {
+            System.out.println("Servidor UDP instânciado na porta " + port);
+            String recieved = recievedStr();
+            if (recieved == null) {
+                return;
+            }
+            String[] split = recieved.split("\\|");
+            String message = split[0];
+            String destiny = split[1];
+            String address = split[2];
+            String port = split[3];
+            int porta = Integer.parseInt(port);
+            String toSend = "Mensagem de " + address + ":" + message;
+            send(toSend, destiny, porta);
         }
     }
 

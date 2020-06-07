@@ -8,16 +8,6 @@ public class Cliente {
 
     public static final String ENDCONNECTION = "Servidor.fim\n";
 
-    public static boolean isNumber(String s) {
-        try{
-            int number = Integer.parseInt(s);
-        }
-        catch (NumberFormatException nfe) {
-            return false;
-        }
-        return true;
-    }
-
     public static class PrintingThread implements Runnable {
         String text;
         public PrintingThread(String text) {

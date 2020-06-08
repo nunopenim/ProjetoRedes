@@ -8,16 +8,6 @@ public class Cliente {
 
     public static final String ENDCONNECTION = "Servidor.fim\n";
 
-    public static class PrintingThread implements Runnable {
-        String text;
-        public PrintingThread(String text) {
-            this.text = text;
-        }
-        public void run() {
-            System.out.println(text);
-        }
-    }
-
     public static class TCPConnection implements Runnable{
 
         String hostname;
@@ -110,9 +100,11 @@ public class Cliente {
 
         public void run() {
             try {
-                UDPConnection client = new UDPConnection(hostname, port);
-                String messageRec = client.recieveEcho();
-                System.out.println(messageRec);
+                while(true) {
+                    UDPConnection client = new UDPConnection(hostname, port);
+                    String messageRec = client.recieveEcho();
+                    System.out.println("Recieved message: " + messageRec);
+                }
             } catch (SocketException e) {
                 e.printStackTrace();
             } catch (UnknownHostException e) {
@@ -136,9 +128,10 @@ public class Cliente {
     }
 
     public static void main(String[] args) throws IOException {
-        //Thread teste1 = new Thread(new UDPConnection("localhost", 9031));
+        UDPConnection ligUDP = new UDPConnection("localhost", 9031);
         TCPConnection ligTCP = new TCPConnection("localhost", 6500);
-        //Thread TCPThread = new Thread(ligTCP);
+        Thread udpThread = new Thread(ligUDP);
+        udpThread.start();
         boolean exit = false;
         menu();
         while(!exit){

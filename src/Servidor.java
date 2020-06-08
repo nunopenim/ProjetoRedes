@@ -78,7 +78,7 @@ public class Servidor {
                             String destino = null;
                             for (String s : getUsers()) {
                                 if (s.startsWith(args[1] + " ")) {
-                                    destino = s;
+                                    destino = s.split(" - ")[1];
                                 }
                             }
                             if (destino == null) {

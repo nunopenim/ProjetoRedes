@@ -51,17 +51,16 @@ public class Cliente {
         }
 
         public void runRec() throws IOException {
-            this.open();
             recieved = this.recieve();
-            this.close();
+        }
+
+        public void openConnection() throws IOException {
+            this.open();
         }
 
         public void run() {
             try {
-                this.open();
                 this.send(textToSend);
-
-                this.close();
             }
             catch (IOException e){
                 e.printStackTrace();
@@ -152,6 +151,7 @@ public class Cliente {
             }
             else {
                 ligTCP.textToSend = s;
+                ligTCP.open();
                 ligTCP.run();
                 if ("2".equals(s)) {
                     System.out.println();
@@ -173,6 +173,7 @@ public class Cliente {
                 else {
                     ligTCP.runRec();
                 }
+                ligTCP.close();
             }
             if (ENDCONNECTION.equals(ligTCP.recieved)) { //server-side end connection
                 ligTCP.close();
@@ -187,8 +188,8 @@ public class Cliente {
             else {
                 if (ligTCP.recieved != null) {
                     System.out.print(ligTCP.recieved);
+                    ligTCP.recieved = "";
                 }
-
             }
         }
     }

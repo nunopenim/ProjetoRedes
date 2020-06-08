@@ -68,7 +68,29 @@ public class Servidor {
                             TimeUnit.SECONDS.sleep(2);
                             UDPThreads[0].run();
                             String msgRec = UDPThreads[0].recieved;
-                            System.out.println("Diagnostics: " + msgRec);
+                            System.out.println("Diagnostics: Message '" + msgRec+"' was recieved");
+                            if (msgRec == null) {
+                                break;
+                            }
+                            String[] args = msgRec.split("\\|");
+                            String mensagem = args[0];
+                            String origem = args[2];
+                            String destino = null;
+                            int porta = Integer.parseInt(args[3]);
+                            for (String s : getUsers()) {
+                                if (s.startsWith(args[1] + " ")) {
+                                    destino = s;
+                                }
+                            }
+                            if (destino == null) {
+                                System.out.println("Diagnostics: destination is null!!");
+                            }
+                            else {
+                                UDPThreads[0].destinyPort = porta;
+                                UDPThreads[0].destiny = destino;
+                                UDPThreads[0].toSend = "Mensagem de " + origem + ":" + mensagem;
+                                UDPThreads[0].sending = true;
+                            }
                             break;
                         case "4":
                             try {

@@ -75,21 +75,32 @@ public class Servidor {
                             String[] args = msgRec.split("\\|");
                             String mensagem = args[0];
                             String origem = args[2];
-                            String destino = null;
-                            for (String s : getUsers()) {
-                                if (s.startsWith(args[1] + " ")) {
+                            String destino = args[1];
+                            if (destino.equals("all")) {
+                                for (String s : getUsers()) {
                                     destino = s.split(" - ")[1];
+                                    UDPThreads[0].toSend = "Mensagem de " + origem + ": " + mensagem;
+                                    UDPThreads[0].destiny = destino;
+                                    UDPThreads[0].sending = true;
+                                    UDPThreads[0].run();
                                 }
                             }
-                            if (destino == null) {
-                                System.out.println("Diagnostics: destination is null!!");
-                            }
                             else {
-                                //UDPThreads[0].destinyPort = UDPThreads[0].port;
-                                UDPThreads[0].destiny = destino;
-                                UDPThreads[0].toSend = "Mensagem de " + origem + ": " + mensagem;
-                                UDPThreads[0].sending = true;
-                                UDPThreads[0].run();
+                                for (String s : getUsers()) {
+                                    if (s.startsWith(args[1] + " ")) {
+                                        destino = s.split(" - ")[1];
+                                    }
+                                }
+                                if (destino == null) {
+                                    System.out.println("Diagnostics: destination is null!!");
+                                }
+                                else {
+                                    //UDPThreads[0].destinyPort = UDPThreads[0].port;
+                                    UDPThreads[0].toSend = "Mensagem de " + origem + ": " + mensagem;
+                                    UDPThreads[0].destiny = destino;
+                                    UDPThreads[0].sending = true;
+                                    UDPThreads[0].run();
+                                }
                             }
                             break;
                         case "4":

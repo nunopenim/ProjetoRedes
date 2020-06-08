@@ -50,11 +50,17 @@ public class Cliente {
             socket.close();
         }
 
+        public void runRec() throws IOException {
+            this.open();
+            recieved = this.recieve();
+            this.close();
+        }
+
         public void run() {
             try {
                 this.open();
                 this.send(textToSend);
-                recieved = this.recieve();
+
                 this.close();
             }
             catch (IOException e){
@@ -157,26 +163,32 @@ public class Cliente {
                     String toSend = mensagem + "|" + destinatario;
                     ligUDP.sendEcho(toSend);
                 }
-                if("3".equals(s)){
+                else if("3".equals(s)){
                     System.out.println();
                     System.out.print("Mensagem? ");
                     String mensagem = bufferRead.readLine();
                     String toSend = mensagem + "|" + "all";
                     ligUDP.sendEcho(toSend);
                 }
+                else {
+                    ligTCP.runRec();
+                }
             }
-            if (ligTCP.recieved.equals(ENDCONNECTION)) { //server-side end connection
+            if (ENDCONNECTION.equals(ligTCP.recieved)) { //server-side end connection
                 ligTCP.close();
                 ligUDP.close();
                 System.out.println("A sair");
                 System.out.println("Cliente desconectado...");
                 exit = true;
             }
-            else if (ligTCP.recieved.equals(UDPSTART)) {
+            else if (UDPSTART.equals(ligTCP.recieved)) {
                 continue;
             }
             else {
-                System.out.print(ligTCP.recieved);
+                if (ligTCP.recieved != null) {
+                    System.out.print(ligTCP.recieved);
+                }
+
             }
         }
     }

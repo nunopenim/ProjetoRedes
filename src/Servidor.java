@@ -141,9 +141,7 @@ public class Servidor {
                 Arrays.fill(buf, (byte) 0);
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 socket.receive(packet);
-                System.out.println("Print 3");
                 InetAddress address = packet.getAddress();
-                System.out.println("Print 4");
                 int port = packet.getPort();
                 packet = new DatagramPacket(buf, buf.length, address, port);
                 String received = new String(packet.getData(), packet.getOffset(), packet.getLength());
@@ -151,7 +149,7 @@ public class Servidor {
                 while (counter < packet.getData().length && packet.getData()[counter] != 0) {
                     counter++;
                 }
-                received = received.substring(0, counter) + "|" + address.toString() + "|" + port; //recieved tem de ter mensagem + destino
+                received = received.substring(0, counter) + "|" + address.toString().split("/")[1] + "|" + port; //recieved tem de ter mensagem + destino
                 return received;
             } catch (SocketException e) {
                 e.printStackTrace();

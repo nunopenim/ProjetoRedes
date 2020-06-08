@@ -111,6 +111,7 @@ public class Cliente {
                 while(true) {
                     String messageRec = this.recieveEcho();
                     if (messageRec != null) {
+                        System.out.println();
                         System.out.println(messageRec);
                     }
                 }

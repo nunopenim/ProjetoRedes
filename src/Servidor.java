@@ -87,7 +87,7 @@ public class Servidor {
                             else {
                                 //UDPThreads[0].destinyPort = UDPThreads[0].port;
                                 UDPThreads[0].destiny = destino;
-                                UDPThreads[0].toSend = "Mensagem de " + origem + ":" + mensagem;
+                                UDPThreads[0].toSend = "Mensagem de " + origem + ": " + mensagem;
                                 UDPThreads[0].sending = true;
                                 UDPThreads[0].run();
                             }

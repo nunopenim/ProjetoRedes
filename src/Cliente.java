@@ -111,7 +111,7 @@ public class Cliente {
                 while(true) {
                     String messageRec = this.recieveEcho();
                     if (messageRec != null) {
-                        System.out.println("Recieved message: " + messageRec);
+                        System.out.println(messageRec);
                     }
                     TimeUnit.SECONDS.sleep(1);
                 }

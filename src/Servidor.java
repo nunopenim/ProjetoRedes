@@ -76,7 +76,6 @@ public class Servidor {
                             String mensagem = args[0];
                             String origem = args[2];
                             String destino = null;
-                            int porta = Integer.parseInt(args[3]);
                             for (String s : getUsers()) {
                                 if (s.startsWith(args[1] + " ")) {
                                     destino = s;
@@ -86,10 +85,11 @@ public class Servidor {
                                 System.out.println("Diagnostics: destination is null!!");
                             }
                             else {
-                                UDPThreads[0].destinyPort = porta;
+                                //UDPThreads[0].destinyPort = UDPThreads[0].port;
                                 UDPThreads[0].destiny = destino;
                                 UDPThreads[0].toSend = "Mensagem de " + origem + ":" + mensagem;
                                 UDPThreads[0].sending = true;
+                                UDPThreads[0].run();
                             }
                             break;
                         case "4":
@@ -187,6 +187,7 @@ public class Servidor {
                 retBuf = data.getBytes();
                 DatagramPacket packet = new DatagramPacket(retBuf, retBuf.length, InetAddress.getByName(address), porta);
                 socket.send(packet);
+                System.out.println("UDP: SENT!");
             } catch (SocketException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -195,17 +196,17 @@ public class Servidor {
         }
 
         public void run() {
-                if (recieving) {
-                    this.recieved = recievedStr();
-                    recieving = false;
-                }
-                if (sending) {
-                    this.send(toSend, destiny, destinyPort);
-                    toSend = null;
-                    destiny = null;
-                    destinyPort = 9031;
-                    sending = false;
-                }
+            if (recieving) {
+                this.recieved = recievedStr();
+                recieving = false;
+            }
+            if (sending) {
+                this.send(toSend, destiny, destinyPort);
+                toSend = null;
+                destiny = null;
+                destinyPort = 9031;
+                sending = false;
+            }
         }
     }
 

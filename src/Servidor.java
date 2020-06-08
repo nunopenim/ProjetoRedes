@@ -1,13 +1,19 @@
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Servidor {
 
     public static TCPServer[] TCPThreads = new TCPServer[10];
 
+    public static UDPServer[] UDPThreads = new UDPServer[10];
+
     public static final String ENDCONNECTION = "Servidor.fim";
+    public static final String UDPSTART = "Servidor.udp\n";
 
     public static class TCPServer implements Runnable {
         int serverPort;
@@ -15,6 +21,19 @@ public class Servidor {
 
         public TCPServer(int port) {
             this.serverPort = port;
+        }
+
+        public static ArrayList<String> getUsers() {
+            ArrayList<String> ret = new ArrayList<>();
+            int count = 0;
+            for (TCPServer t : TCPThreads) {
+                if (t != null && t.socket != null) {
+                    String ip = (((InetSocketAddress) t.socket.getRemoteSocketAddress()).getAddress()).toString().replace("/", "");
+                    ret.add(count + " - " + ip);
+                    count++;
+                }
+            }
+            return ret;
         }
 
         public void run() {
@@ -32,23 +51,24 @@ public class Servidor {
                     switch (linha) {
                         case "99":
                             ret = ENDCONNECTION;
+                            ps.print(ret);
                             break;
                         case "1":
-                            int count = 0;
                             ret = "";
-                            for (TCPServer t : TCPThreads) {
-                                if (t != null && t.socket != null) {
-                                    String ip = (((InetSocketAddress) t.socket.getRemoteSocketAddress()).getAddress()).toString().replace("/", "");
-                                    ret += count + " - " + ip;
-                                    count++;
-                                }
+                            ArrayList<String> users = getUsers();
+                            for (String s : users) {
+                                ret += s + "\n";
                             }
+                            ps.print(ret);
                             break;
                         case "2":
-                            //UDPThread aqui
-                            break;
                         case "3":
-                            //UDPThread aqui
+                            ps.print(UDPSTART);
+                            UDPThreads[0].recieving = true;
+                            TimeUnit.SECONDS.sleep(2);
+                            UDPThreads[0].run();
+                            String msgRec = UDPThreads[0].recieved;
+                            System.out.println("Diagnostics: " + msgRec);
                             break;
                         case "4":
                             try {
@@ -60,8 +80,10 @@ public class Servidor {
                                     ret += data + "\n";
                                 }
                                 myReader.close();
+                                ps.print(ret);
                             } catch (FileNotFoundException e) {
                                 ret = "The whitelist file doesn't exist on this server!";
+                                ps.print(ret);
                             }
                             break;
                         case "5":
@@ -74,19 +96,21 @@ public class Servidor {
                                     ret += data + System.getProperty("line.separator");
                                 }
                                 myReader.close();
+                                ps.print(ret);
                             } catch (FileNotFoundException e) {
                                 ret = "The blacklist file doesn't exist on this server!";
+                                ps.print(ret);
                             }
                             break;
                         default:
                             ret = "Opção inválida!";
+                            ps.print(ret);
                             break;
                     }
-                    ps.print(ret);
                     socket.close();
                 }
 
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         }
@@ -94,7 +118,12 @@ public class Servidor {
 
     public static class UDPServer implements Runnable {
         private DatagramSocket socket;
-        private boolean running;
+        public boolean recieving = false;
+        public boolean sending = false;
+        public String recieved = null;
+        public String toSend = null;
+        public String destiny = null;
+        public int destinyPort = 9031;
         private byte[] buf = new byte[256];
         private int port;
 
@@ -112,7 +141,9 @@ public class Servidor {
                 Arrays.fill(buf, (byte) 0);
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 socket.receive(packet);
+                System.out.println("Print 3");
                 InetAddress address = packet.getAddress();
+                System.out.println("Print 4");
                 int port = packet.getPort();
                 packet = new DatagramPacket(buf, buf.length, address, port);
                 String received = new String(packet.getData(), packet.getOffset(), packet.getLength());
@@ -144,25 +175,25 @@ public class Servidor {
         }
 
         public void run() {
-            System.out.println("Servidor UDP instânciado na porta " + port);
-            String recieved = recievedStr();
-            if (recieved == null) {
-                return;
-            }
-            String[] split = recieved.split("\\|");
-            String message = split[0];
-            String destiny = split[1];
-            String address = split[2];
-            String port = split[3];
-            int porta = Integer.parseInt(port);
-            String toSend = "Mensagem de " + address + ":" + message;
-            send(toSend, destiny, porta);
+                if (recieving) {
+                    this.recieved = recievedStr();
+                    recieving = false;
+                }
+                if (sending) {
+                    this.send(toSend, destiny, destinyPort);
+                    toSend = null;
+                    destiny = null;
+                    destinyPort = 9031;
+                    sending = false;
+                }
         }
     }
 
     public static void main(String[] args) throws SocketException {
         TCPThreads[0] = new TCPServer(6500);
+        UDPThreads[0] = new UDPServer(9031);
         Thread[] threadsTCP = new Thread[TCPThreads.length];
+        Thread[] threadsUDP = new Thread[UDPThreads.length];
         for (int i = 0; i < TCPThreads.length; i++) {
             if (TCPThreads[i] != null) {
                 threadsTCP[i] = new Thread(TCPThreads[i]);
@@ -171,7 +202,20 @@ public class Servidor {
                 threadsTCP[i] = null;
             }
         }
+        for (int i = 0; i < UDPThreads.length; i++) {
+            if (UDPThreads[i] != null) {
+                threadsUDP[i] = new Thread(UDPThreads[i]);
+            }
+            else {
+                threadsUDP[i] = null;
+            }
+        }
         for(Thread t : threadsTCP) {
+            if (t != null) {
+                t.start();
+            }
+        }
+        for(Thread t : threadsUDP) {
             if (t != null) {
                 t.start();
             }

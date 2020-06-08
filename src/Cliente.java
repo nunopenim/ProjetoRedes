@@ -3,10 +3,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.*;
+import java.util.concurrent.TimeUnit;
 
 public class Cliente {
 
     public static final String ENDCONNECTION = "Servidor.fim\n";
+
+    public static final String UDPSTART = "Servidor.udp\n";
 
     public static class TCPConnection implements Runnable{
 
@@ -52,9 +55,6 @@ public class Cliente {
                 this.open();
                 this.send(textToSend);
                 recieved = this.recieve();
-                if (recieved.equals("Servidor.fim")) { //terminar ligação
-                    this.close();
-                }
                 this.close();
             }
             catch (IOException e){
@@ -68,8 +68,6 @@ public class Cliente {
         private DatagramSocket socket;
         private InetAddress address;
         private int port;
-
-        public String messg;
 
         private byte[] buf;
 
@@ -89,9 +87,14 @@ public class Cliente {
         public String recieveEcho() throws IOException {
             byte[] recBuf = new byte[256];
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
-            socket.receive(packet);
-            String received = new String(packet.getData(), 0, packet.getLength());
-            return received;
+            socket.setSoTimeout(250);
+            try{
+                socket.receive(packet);
+                return new String(packet.getData(), 0, packet.getLength());
+            }
+            catch (SocketTimeoutException e) {
+                return null;
+            }
         }
 
         public void close() {
@@ -101,15 +104,13 @@ public class Cliente {
         public void run() {
             try {
                 while(true) {
-                    UDPConnection client = new UDPConnection(hostname, port);
-                    String messageRec = client.recieveEcho();
-                    System.out.println("Recieved message: " + messageRec);
+                    String messageRec = this.recieveEcho();
+                    if (messageRec != null) {
+                        System.out.println("Recieved message: " + messageRec);
+                    }
+                    TimeUnit.SECONDS.sleep(1);
                 }
-            } catch (SocketException e) {
-                e.printStackTrace();
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (InterruptedException | IOException e) {
                 e.printStackTrace();
             }
         }
@@ -146,11 +147,33 @@ public class Cliente {
             else {
                 ligTCP.textToSend = s;
                 ligTCP.run();
+                if ("2".equals(s)) {
+                    System.out.println();
+                    System.out.print("Utilizador? ");
+                    String destinatario = bufferRead.readLine();
+                    System.out.println();
+                    System.out.print("Mensagem? ");
+                    String mensagem = bufferRead.readLine();
+                    String toSend = mensagem + "|" + destinatario;
+                    ligUDP.sendEcho(toSend);
+                }
+                if("3".equals(s)){
+                    System.out.println();
+                    System.out.print("Mensagem? ");
+                    String mensagem = bufferRead.readLine();
+                    String toSend = mensagem + "|" + "all";
+                    ligUDP.sendEcho(toSend);
+                }
             }
             if (ligTCP.recieved.equals(ENDCONNECTION)) { //server-side end connection
+                ligTCP.close();
+                ligUDP.close();
                 System.out.println("A sair");
                 System.out.println("Cliente desconectado...");
                 exit = true;
+            }
+            else if (ligTCP.recieved.equals(UDPSTART)) {
+                continue;
             }
             else {
                 System.out.print(ligTCP.recieved);

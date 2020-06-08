@@ -92,7 +92,7 @@ public class Cliente {
         public String recieveEcho() throws IOException {
             byte[] recBuf = new byte[256];
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
-            socket.setSoTimeout(250);
+            //socket.setSoTimeout(250);
             try{
                 socket.receive(packet);
                 return new String(packet.getData(), 0, packet.getLength());
@@ -113,9 +113,8 @@ public class Cliente {
                     if (messageRec != null) {
                         System.out.println(messageRec);
                     }
-                    TimeUnit.SECONDS.sleep(1);
                 }
-            } catch (InterruptedException | IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }

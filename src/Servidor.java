@@ -164,7 +164,7 @@ public class Servidor {
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 socket.receive(packet);
                 InetAddress address = packet.getAddress();
-                int port = packet.getPort();
+                destinyPort = packet.getPort();
                 packet = new DatagramPacket(buf, buf.length, address, port);
                 String received = new String(packet.getData(), packet.getOffset(), packet.getLength());
                 int counter = 0;
@@ -181,11 +181,11 @@ public class Servidor {
             return null;
         }
 
-        public void send(String data, String address, int porta) {
+        public void send(String data, String address) {
             try{
                 byte[] retBuf = new byte[256];
                 retBuf = data.getBytes();
-                DatagramPacket packet = new DatagramPacket(retBuf, retBuf.length, InetAddress.getByName(address), porta);
+                DatagramPacket packet = new DatagramPacket(retBuf, retBuf.length, InetAddress.getByName(address), destinyPort);
                 socket.send(packet);
                 System.out.println("UDP: SENT!");
             } catch (SocketException e) {
@@ -201,7 +201,7 @@ public class Servidor {
                 recieving = false;
             }
             if (sending) {
-                this.send(toSend, destiny, destinyPort);
+                this.send(toSend, destiny);
                 toSend = null;
                 destiny = null;
                 destinyPort = 9031;

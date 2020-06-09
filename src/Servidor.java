@@ -18,9 +18,11 @@ public class Servidor {
     public static class TCPServer implements Runnable {
         int serverPort;
         Socket socket = null;
+        int index;
 
-        public TCPServer(int port) {
+        public TCPServer(int port, int index) {
             this.serverPort = port;
+            this.index = index;
         }
 
         public static ArrayList<String> getUsers() {
@@ -40,8 +42,9 @@ public class Servidor {
             ServerSocket server = null;
             try {
                 server = new ServerSocket(serverPort);
+                System.out.println("TCP Listening: " + serverPort);
                 socket = server.accept();
-                System.out.println("Servidor TCP instânciado na porta " + serverPort);
+                System.out.println("TCP Server connected on: " + serverPort);
                 while (true) {
                     BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     PrintStream ps = new PrintStream(socket.getOutputStream());
@@ -66,10 +69,10 @@ public class Servidor {
                         case "2":
                         case "3":
                             ps.print(UDPSTART);
-                            UDPThreads[0].recieving = true;
-                            TimeUnit.SECONDS.sleep(2);
-                            UDPThreads[0].run();
-                            String msgRec = UDPThreads[0].recieved;
+                            UDPThreads[index].recieving = true;
+                            //TimeUnit.SECONDS.sleep(1);
+                            UDPThreads[index].exec();
+                            String msgRec = UDPThreads[index].recieved;
                             System.out.println("Diagnostics: Message '" + msgRec+"' was recieved");
                             if (msgRec == null) {
                                 break;
@@ -84,10 +87,10 @@ public class Servidor {
                             if (destino.equals("all")) {
                                 for (String s : getUsers()) {
                                     destino = s.split(" - ")[1];
-                                    UDPThreads[0].toSend = "Mensagem de " + origem + ": " + mensagem;
-                                    UDPThreads[0].destiny = destino;
-                                    UDPThreads[0].sending = true;
-                                    UDPThreads[0].run();
+                                    UDPThreads[index].toSend = "Mensagem de " + origem + ": " + mensagem;
+                                    UDPThreads[index].destiny = destino;
+                                    UDPThreads[index].sending = true;
+                                    UDPThreads[index].exec();
                                 }
                             }
                             else {
@@ -101,10 +104,10 @@ public class Servidor {
                                 }
                                 else {
                                     //UDPThreads[0].destinyPort = UDPThreads[0].port;
-                                    UDPThreads[0].toSend = "Mensagem de " + origem + ": " + mensagem;
-                                    UDPThreads[0].destiny = destino;
-                                    UDPThreads[0].sending = true;
-                                    UDPThreads[0].run();
+                                    UDPThreads[index].toSend = "Mensagem de " + origem + ": " + mensagem;
+                                    UDPThreads[index].destiny = destino;
+                                    UDPThreads[index].sending = true;
+                                    UDPThreads[index].exec();
                                 }
                             }
                             break;
@@ -148,7 +151,7 @@ public class Servidor {
                     //ps.flush(); //IMPORTANTE
                 }
                 //socket.close();
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -212,6 +215,11 @@ public class Servidor {
         }
 
         public void run() {
+            System.out.println("UDP server started on: " + port);
+            exec();
+        }
+
+        public void exec() {
             if (recieving) {
                 this.recieved = recievedStr();
                 recieving = false;
@@ -227,7 +235,7 @@ public class Servidor {
     }
 
     public static void main(String[] args) throws SocketException {
-        TCPThreads[0] = new TCPServer(6500);
+        TCPThreads[0] = new TCPServer(6500, 0);
         UDPThreads[0] = new UDPServer(9031);
         Thread[] threadsTCP = new Thread[TCPThreads.length];
         Thread[] threadsUDP = new Thread[UDPThreads.length];

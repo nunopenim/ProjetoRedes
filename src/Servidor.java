@@ -76,6 +76,9 @@ public class Servidor {
                             String mensagem = args[0];
                             String origem = args[2];
                             String destino = args[1];
+                            //System.out.println(args[1]);
+                            //System.out.println(destino);
+                            //System.out.println(destino.equals("all "));
                             if (destino.equals("all")) {
                                 for (String s : getUsers()) {
                                     destino = s.split(" - ")[1];

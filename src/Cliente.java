@@ -3,6 +3,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.*;
+import java.sql.Time;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 public class Cliente {
@@ -17,6 +19,7 @@ public class Cliente {
         int portNumber;
         Socket socket;
         String textToSend = "Connected!";
+        //Scanner br;
         String recieved = null;
 
         TCPConnection(String host, int port) {
@@ -26,6 +29,7 @@ public class Cliente {
 
         public void open() throws IOException {
             socket = new Socket(hostname, portNumber);
+            //br = new Scanner(new InputStreamReader(socket.getInputStream()));
         }
 
         public void send(String s) throws IOException {
@@ -33,11 +37,12 @@ public class Cliente {
             ps.println(s);
         }
 
-        public String recieve() throws IOException {
+        public String recieve() throws IOException, InterruptedException {
             BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String line = null;
             String text = "";
-            while ((line = br.readLine()) != null) {
+            while (br.ready()) {
+                line = br.readLine();
                 if (line.isEmpty()) {
                     break;
                 }
@@ -47,15 +52,13 @@ public class Cliente {
         }
 
         public void close() throws IOException {
-            socket.close();
+            if (socket != null) {
+                socket.close();
+            }
         }
 
-        public void runRec() throws IOException {
+        public void runRec() throws IOException, InterruptedException {
             recieved = this.recieve();
-        }
-
-        public void openConnection() throws IOException {
-            this.open();
         }
 
         public void run() {
@@ -133,12 +136,13 @@ public class Cliente {
         System.out.println("99 - Sair");
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         UDPConnection ligUDP = new UDPConnection("localhost", 9031);
         TCPConnection ligTCP = new TCPConnection("localhost", 6500);
         Thread udpThread = new Thread(ligUDP);
         udpThread.start();
         boolean exit = false;
+        ligTCP.open();
         menu();
         while(!exit){
             System.out.println();
@@ -149,9 +153,10 @@ public class Cliente {
                 menu();
                 continue;
             }
+            else if ("99".equals(s)) {
+            }
             else {
                 ligTCP.textToSend = s;
-                ligTCP.open();
                 ligTCP.run();
                 if ("2".equals(s)) {
                     System.out.println();
@@ -173,10 +178,11 @@ public class Cliente {
                 else {
                     ligTCP.runRec();
                 }
-                ligTCP.close();
+                //ligTCP.close();
             }
-            if (ENDCONNECTION.equals(ligTCP.recieved)) { //server-side end connection
+            if (ENDCONNECTION.equals(ligTCP.recieved) || "99".equals(s)) { //server-side end connection
                 ligTCP.close();
+                udpThread.stop(); //necessario, senao rebenta
                 ligUDP.close();
                 System.out.println("A sair");
                 System.out.println("Cliente desconectado...");

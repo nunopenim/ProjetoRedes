@@ -40,9 +40,9 @@ public class Servidor {
             ServerSocket server = null;
             try {
                 server = new ServerSocket(serverPort);
+                socket = server.accept();
                 System.out.println("Servidor TCP instânciado na porta " + serverPort);
                 while (true) {
-                    socket = server.accept();
                     BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     PrintStream ps = new PrintStream(socket.getOutputStream());
                     String linha = br.readLine();
@@ -60,6 +60,7 @@ public class Servidor {
                                 ret += s + "\n";
                             }
                             ps.print(ret);
+                            ps.flush();
                             break;
                         case "2":
                         case "3":
@@ -143,9 +144,9 @@ public class Servidor {
                             ps.print(ret);
                             break;
                     }
-                    socket.close();
+                    ps.flush(); //IMPORTANTE
                 }
-
+                //socket.close();
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }

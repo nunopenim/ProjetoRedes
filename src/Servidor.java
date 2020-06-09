@@ -9,20 +9,22 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Servidor {
 
     public static TCPServer[] TCPThreads = new TCPServer[10];
-
     public static UDPServer[] UDPThreads = new UDPServer[10];
+    public static Thread[] threadsTCP = new Thread[TCPThreads.length];
+    public static Thread[] threadsUDP = new Thread[UDPThreads.length];
 
     public static final String ENDCONNECTION = "Servidor.fim";
     public static final String UDPSTART = "Servidor.udp\n";
 
     public static class TCPServer implements Runnable {
-        int serverPort;
+        //int serverPort;
         Socket socket = null;
         int index;
 
-        public TCPServer(int port, int index) {
-            this.serverPort = port;
+        public TCPServer(int index, Socket sock) {
+            //this.serverPort = port;
             this.index = index;
+            this.socket = sock;
         }
 
         public static ArrayList<String> getUsers() {
@@ -41,10 +43,8 @@ public class Servidor {
         public void run() {
             ServerSocket server = null;
             try {
-                server = new ServerSocket(serverPort);
-                System.out.println("TCP Listening: " + serverPort);
-                socket = server.accept();
-                System.out.println("TCP Server connected on: " + serverPort);
+                System.out.println("TCP Server connected");
+                //UDPThreads[index] = new UDPServer(9031);
                 while (true) {
                     BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     PrintStream ps = new PrintStream(socket.getOutputStream());
@@ -70,7 +70,7 @@ public class Servidor {
                         case "3":
                             ps.print(UDPSTART);
                             UDPThreads[index].recieving = true;
-                            //TimeUnit.SECONDS.sleep(1);
+                            TimeUnit.SECONDS.sleep(4);
                             UDPThreads[index].exec();
                             String msgRec = UDPThreads[index].recieved;
                             System.out.println("Diagnostics: Message '" + msgRec+"' was recieved");
@@ -85,12 +85,15 @@ public class Servidor {
                             //System.out.println(destino);
                             //System.out.println(destino.equals("all "));
                             if (destino.equals("all")) {
-                                for (String s : getUsers()) {
-                                    destino = s.split(" - ")[1];
-                                    UDPThreads[index].toSend = "Mensagem de " + origem + ": " + mensagem;
-                                    UDPThreads[index].destiny = destino;
-                                    UDPThreads[index].sending = true;
-                                    UDPThreads[index].exec();
+                                for (UDPServer u : UDPThreads) {
+                                    if (u != null) {
+                                        for (String s : getUsers()) {
+                                            u.toSend = "Mensagem de " + origem + ": " + mensagem;
+                                            u.destiny = s.split(" - ")[1];
+                                            u.sending = true;
+                                            u.exec();
+                                        }
+                                    }
                                 }
                             }
                             else {
@@ -151,7 +154,7 @@ public class Servidor {
                     //ps.flush(); //IMPORTANTE
                 }
                 //socket.close();
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         }
@@ -168,8 +171,8 @@ public class Servidor {
         private byte[] buf = new byte[256];
         private int port;
 
-        public UDPServer(int port) throws SocketException {
-            socket = new DatagramSocket(port);
+        public UDPServer(int port, DatagramSocket sock) throws SocketException {
+            socket = sock;
             this.port = port;
         }
 
@@ -221,6 +224,7 @@ public class Servidor {
 
         public void exec() {
             if (recieving) {
+                this.recieved = null;
                 this.recieved = recievedStr();
                 recieving = false;
             }
@@ -234,36 +238,17 @@ public class Servidor {
         }
     }
 
-    public static void main(String[] args) throws SocketException {
-        TCPThreads[0] = new TCPServer(6500, 0);
-        UDPThreads[0] = new UDPServer(9031);
-        Thread[] threadsTCP = new Thread[TCPThreads.length];
-        Thread[] threadsUDP = new Thread[UDPThreads.length];
-        for (int i = 0; i < TCPThreads.length; i++) {
-            if (TCPThreads[i] != null) {
-                threadsTCP[i] = new Thread(TCPThreads[i]);
-            }
-            else {
-                threadsTCP[i] = null;
-            }
-        }
-        for (int i = 0; i < UDPThreads.length; i++) {
-            if (UDPThreads[i] != null) {
-                threadsUDP[i] = new Thread(UDPThreads[i]);
-            }
-            else {
-                threadsUDP[i] = null;
-            }
-        }
-        for(Thread t : threadsTCP) {
-            if (t != null) {
-                t.start();
-            }
-        }
-        for(Thread t : threadsUDP) {
-            if (t != null) {
-                t.start();
-            }
+    public static void main(String[] args) throws IOException {
+        ServerSocket server = new ServerSocket(6500);
+        for (int i = 0; i < threadsTCP.length; i++) {
+            Socket socket = server.accept();
+            TCPThreads[i] = new TCPServer(i, socket);
+            DatagramSocket udpServer = new DatagramSocket(9031 + i);
+            UDPThreads[i] = new UDPServer(9031 + i, udpServer);
+            threadsTCP[i] = new Thread(TCPThreads[i]);
+            threadsTCP[i].start();
+            threadsUDP[i] = new Thread(UDPThreads[i]);
+            threadsUDP[i].start();
         }
     }
 }

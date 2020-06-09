@@ -3,7 +3,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.*;
+import java.sql.Array;
 import java.sql.Time;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -75,8 +77,6 @@ public class Cliente {
         private InetAddress address;
         private int port;
 
-        private byte[] buf;
-
         public UDPConnection(String address, int port) throws SocketException, UnknownHostException {
             socket = new DatagramSocket();
             this.hostname = address;
@@ -85,7 +85,7 @@ public class Cliente {
         }
 
         public void sendEcho(String msg) throws IOException {
-            buf = msg.getBytes();
+            byte[] buf = msg.getBytes();
             DatagramPacket packet = new DatagramPacket(buf, buf.length, address, this.port);
             socket.send(packet);
         }
@@ -93,7 +93,6 @@ public class Cliente {
         public String recieveEcho() throws IOException {
             byte[] recBuf = new byte[256];
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
-            //socket.setSoTimeout(250);
             try{
                 socket.receive(packet);
                 return new String(packet.getData(), 0, packet.getLength());

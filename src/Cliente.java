@@ -19,7 +19,7 @@ public class Cliente {
         int portNumber;
         Socket socket;
         String textToSend = "Connected!";
-        //Scanner br;
+        BufferedReader br;
         String recieved = null;
 
         TCPConnection(String host, int port) {
@@ -29,7 +29,7 @@ public class Cliente {
 
         public void open() throws IOException {
             socket = new Socket(hostname, portNumber);
-            //br = new Scanner(new InputStreamReader(socket.getInputStream()));
+            br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         }
 
         public void send(String s) throws IOException {
@@ -38,14 +38,12 @@ public class Cliente {
         }
 
         public String recieve() throws IOException, InterruptedException {
-            BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String line = null;
             String text = "";
+            while (!br.ready()) {
+            }
             while (br.ready()) {
                 line = br.readLine();
-                if (line.isEmpty()) {
-                    break;
-                }
                 text += line + "\n";
             }
             return text;
@@ -158,7 +156,8 @@ public class Cliente {
             else {
                 ligTCP.textToSend = s;
                 ligTCP.run();
-                if ("2".equals(s)) {
+                ligTCP.runRec();
+                if ("2".equals(s) && ligTCP.recieved.equals(UDPSTART)) {
                     System.out.println();
                     System.out.print("Utilizador? ");
                     String destinatario = bufferRead.readLine();
@@ -168,17 +167,16 @@ public class Cliente {
                     String toSend = mensagem + "|" + destinatario;
                     ligUDP.sendEcho(toSend);
                 }
-                else if("3".equals(s)){
+                else if("3".equals(s)&& ligTCP.recieved.equals(UDPSTART)){
                     System.out.println();
                     System.out.print("Mensagem? ");
                     String mensagem = bufferRead.readLine();
                     String toSend = mensagem + "|" + "all";
                     ligUDP.sendEcho(toSend);
                 }
-                else {
-                    ligTCP.runRec();
+                else if (!ligTCP.recieved.equals(UDPSTART) && (("2".equals(s) || "3".equals(s)))) {
+                    System.out.println("There was a failrule trying to start the UDP client");
                 }
-                //ligTCP.close();
             }
             if (ENDCONNECTION.equals(ligTCP.recieved) || "99".equals(s)) { //server-side end connection
                 ligTCP.close();

@@ -45,13 +45,14 @@ public class Servidor {
                 while (true) {
                     BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     PrintStream ps = new PrintStream(socket.getOutputStream());
+                    ps.flush();
                     String linha = br.readLine();
                     System.out.println("Diagnostics: " + linha + " was recieved");
                     String ret = "Ping!";
                     switch (linha) {
                         case "99":
                             ret = ENDCONNECTION;
-                            ps.print(ret);
+                            ps.println(ret);
                             break;
                         case "1":
                             ret = "";
@@ -59,8 +60,8 @@ public class Servidor {
                             for (String s : users) {
                                 ret += s + "\n";
                             }
-                            ps.print(ret);
-                            ps.flush();
+                            ps.println(ret);
+                            //ps.flush();
                             break;
                         case "2":
                         case "3":
@@ -117,10 +118,10 @@ public class Servidor {
                                     ret += data + "\n";
                                 }
                                 myReader.close();
-                                ps.print(ret);
+                                ps.println(ret);
                             } catch (FileNotFoundException e) {
                                 ret = "The whitelist file doesn't exist on this server!";
-                                ps.print(ret);
+                                ps.println(ret);
                             }
                             break;
                         case "5":
@@ -133,18 +134,18 @@ public class Servidor {
                                     ret += data + System.getProperty("line.separator");
                                 }
                                 myReader.close();
-                                ps.print(ret);
+                                ps.println(ret);
                             } catch (FileNotFoundException e) {
                                 ret = "The blacklist file doesn't exist on this server!";
-                                ps.print(ret);
+                                ps.println(ret);
                             }
                             break;
                         default:
                             ret = "Opção inválida!";
-                            ps.print(ret);
+                            ps.println(ret);
                             break;
                     }
-                    ps.flush(); //IMPORTANTE
+                    //ps.flush(); //IMPORTANTE
                 }
                 //socket.close();
             } catch (IOException | InterruptedException e) {

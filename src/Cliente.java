@@ -82,6 +82,9 @@ public class Cliente {
             this.hostname = address;
             this.address = InetAddress.getByName(address);
             this.port = port;
+            socket = new DatagramSocket(null);
+            InetSocketAddress sockAd = new InetSocketAddress(hostname, port);
+            socket.bind(sockAd);
         }
 
         public void sendEcho(String msg) throws IOException {
@@ -92,14 +95,10 @@ public class Cliente {
 
         public String recieveEcho() throws IOException {
             byte[] recBuf = new byte[256];
+            Arrays.fill(recBuf, (byte) 0);
             DatagramPacket packet = new DatagramPacket(recBuf, recBuf.length);
-            try{
-                socket.receive(packet);
-                return new String(packet.getData(), 0, packet.getLength());
-            }
-            catch (SocketTimeoutException e) {
-                return null;
-            }
+            socket.receive(packet);
+            return new String(packet.getData(), 0, packet.getLength());
         }
 
         public void close() {
@@ -110,12 +109,8 @@ public class Cliente {
             try {
                 while(true) {
                     String messageRec = this.recieveEcho();
-                    if (messageRec != null) {
-                        synchronized (System.out) {
-                            System.out.println();
-                            System.out.println(messageRec);
-                        }
-                    }
+                    System.out.println();
+                    System.out.println(messageRec);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -139,10 +134,11 @@ public class Cliente {
         UDPConnection ligUDP = new UDPConnection("localhost", 9031);
         TCPConnection ligTCP = new TCPConnection("localhost", 6500);
         Thread udpThread = new Thread(ligUDP);
-        udpThread.start();
+        //udpThread.start();
         boolean exit = false;
         ligTCP.open();
         menu();
+        udpThread.start();
         while(!exit){
             System.out.println();
             System.out.print("Opção? ");
@@ -169,7 +165,6 @@ public class Cliente {
                     //ligUDP.sendEcho(toSend);
                     ligTCP.textToSend = toSend;
                     ligTCP.run();
-                    ligUDP.sendEcho("Ping");
                 }
                 else if("3".equals(s)&& ligTCP.recieved.equals(UDPSTART)){
                     System.out.println();
@@ -179,7 +174,6 @@ public class Cliente {
                     ligTCP.textToSend = toSend;
                     ligTCP.run();
                     //ligUDP.sendEcho(toSend);
-                    ligUDP.sendEcho("Ping");
                 }
                 else if (!ligTCP.recieved.equals(UDPSTART) && (("2".equals(s) || "3".equals(s)))) {
                     System.out.println("There was a failrule trying to start the UDP client");

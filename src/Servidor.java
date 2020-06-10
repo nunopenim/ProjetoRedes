@@ -85,28 +85,37 @@ public class Servidor {
                             //System.out.println(destino);
                             //System.out.println(destino.equals("all "));
                             if (destino.equals("all")) {
-                                for (String s : getUsers()) {
-                                    UDPThreads[index].toSend = "Mensagem de " + origem + ": " + mensagem;
-                                    UDPThreads[index].destiny = s.split(" - ")[1];
-                                    UDPThreads[index].sending = true;
-                                    UDPThreads[index].run();
+                                for (UDPServer t : UDPThreads) {
+                                    if(t == null) {
+                                        continue;
+                                    }
+                                    t.toSend = "Mensagem de " + origem + ": " + mensagem;
+                                    //UDPThreads[index].destiny = s.split(" - ")[1];
+                                    t.sending = true;
+                                    t.run();
                                 }
                             }
                             else {
+                                int person = 0;
+                                boolean invalid = false;
                                 for (String s : getUsers()) {
                                     if (s.startsWith(args[1] + " ")) {
-                                        destino = s.split(" - ")[1];
+                                        try {
+                                            person = Integer.parseInt(s.split(" - ")[0]);
+                                        }
+                                        catch (Exception e){
+                                            invalid = true;
+                                        }
                                     }
                                 }
-                                if (destino == null) {
+                                if (invalid) {
                                     System.out.println("Diagnostics: destination is null!!");
                                 }
                                 else {
                                     //UDPThreads[0].destinyPort = UDPThreads[0].port;
-                                    UDPThreads[index].toSend = "Mensagem de " + origem + ": " + mensagem;
-                                    UDPThreads[index].destiny = destino;
-                                    UDPThreads[index].sending = true;
-                                    UDPThreads[index].run();
+                                    UDPThreads[person].toSend = "Mensagem de " + origem + ": " + mensagem;
+                                    UDPThreads[person].sending = true;
+                                    UDPThreads[person].run();
                                 }
                             }
                             break;
@@ -163,13 +172,14 @@ public class Servidor {
         public String recieved = null;
         public String toSend = null;
         public String destiny = null;
-        public int destinyPort = 9031;
+        public int destinyPort;
         private byte[] buf = new byte[256];
         private int port;
 
         public UDPServer(int port) throws SocketException {
             socket = new DatagramSocket();
             this.port = port;
+            this.destinyPort = port;
         }
 
         public void close() {
@@ -219,7 +229,8 @@ public class Servidor {
         }
 
         public void exec() {
-            if (false && recieving) { //temporary disabled
+            if (false && recieving) { //temporarily disabled
+                System.out.println("Entered");
                 this.recieved = null;
                 this.recieved = recievedStr();
                 recieving = false;
@@ -227,8 +238,8 @@ public class Servidor {
             if (sending) {
                 this.send(toSend, destiny);
                 toSend = null;
-                destiny = null;
-                destinyPort = 9031;
+                //destiny = null;
+                //destinyPort = port;
                 sending = false;
             }
         }
@@ -239,13 +250,14 @@ public class Servidor {
         for (int i = 0; i < threadsTCP.length; i++) {
             Socket socket = server.accept();
             TCPThreads[i] = new TCPServer(i, socket);
-            UDPThreads[i] = new UDPServer(9031);
+            UDPThreads[i] = new UDPServer(9031+i);
+            UDPThreads[i].destiny = (((InetSocketAddress) socket.getRemoteSocketAddress()).getAddress()).toString().replace("/", "");
             //UDPThreads[i].recieving = true;
             //UDPThreads[i].exec();
             threadsTCP[i] = new Thread(TCPThreads[i]);
             threadsUDP[i] = new Thread(UDPThreads[i]);
             threadsTCP[i].start();
-            //threadsUDP[i].start();
+            threadsUDP[i].start();
         }
     }
 }

@@ -3,13 +3,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.*;
-import java.sql.Array;
-import java.sql.Time;
 import java.util.Arrays;
-import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 
-public class Cliente {
+public class Cliente2 {
 
     public static final String ENDCONNECTION = "Servidor.fim\n";
 
@@ -131,7 +127,7 @@ public class Cliente {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        UDPConnection ligUDP = new UDPConnection("localhost", 9031);
+        UDPConnection ligUDP = new UDPConnection("localhost", 9032);
         TCPConnection ligTCP = new TCPConnection("localhost", 6500);
         Thread udpThread = new Thread(ligUDP);
         //udpThread.start();

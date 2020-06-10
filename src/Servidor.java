@@ -46,7 +46,7 @@ public class Servidor {
                 while (true) {
                     BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     PrintStream ps = new PrintStream(socket.getOutputStream());
-                    ps.flush();
+                    ps.println(UDPThreads[index].port);
                     String linha = br.readLine();
                     System.out.println("Diagnostics: " + linha + " was recieved");
                     //UDPThreads[index].recievedStr();

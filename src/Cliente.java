@@ -4,7 +4,6 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.*;
 import java.util.Arrays;
-import java.util.Scanner;
 
 public class Cliente {
 
@@ -131,23 +130,14 @@ public class Cliente {
         BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
         System.out.print("Introduza o endereço do servidor> ");
         String opt = bufferRead.readLine();
-        System.out.print("Introduza a porta UDP> ");
-        String portRead = bufferRead.readLine();
-        int portUDP = 9031;
-        try {
-            portUDP = Integer.parseInt(portRead);
-        }
-        catch (Exception e) {
-            System.out.println("Porta inválida, a assumir 9031");
-        }
-        UDPConnection ligUDP = new UDPConnection(opt, portUDP);
         TCPConnection ligTCP = new TCPConnection(opt, 6500);
-        Thread udpThread = new Thread(ligUDP);
-        //udpThread.start();
         boolean exit = false;
         ligTCP.open();
+        String porta = ligTCP.recieve();
+        int portUDP = Integer.parseInt(porta.replace("\n", ""));
+        UDPConnection ligUDP = new UDPConnection(opt, portUDP);
+        Thread udpThread = new Thread(ligUDP);
         menu();
-        //ligUDP.sendEcho("test");
         udpThread.start();
         while(!exit){
             System.out.println();

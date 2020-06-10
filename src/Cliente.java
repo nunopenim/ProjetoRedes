@@ -111,8 +111,10 @@ public class Cliente {
                 while(true) {
                     String messageRec = this.recieveEcho();
                     if (messageRec != null) {
-                        System.out.println();
-                        System.out.println(messageRec);
+                        synchronized (System.out) {
+                            System.out.println();
+                            System.out.println(messageRec);
+                        }
                     }
                 }
             } catch (IOException e) {
@@ -164,14 +166,20 @@ public class Cliente {
                     System.out.print("Mensagem? ");
                     String mensagem = bufferRead.readLine();
                     String toSend = mensagem + "|" + destinatario;
-                    ligUDP.sendEcho(toSend);
+                    //ligUDP.sendEcho(toSend);
+                    ligTCP.textToSend = toSend;
+                    ligTCP.run();
+                    ligUDP.sendEcho("Ping");
                 }
                 else if("3".equals(s)&& ligTCP.recieved.equals(UDPSTART)){
                     System.out.println();
                     System.out.print("Mensagem? ");
                     String mensagem = bufferRead.readLine();
                     String toSend = mensagem + "|" + "all";
-                    ligUDP.sendEcho(toSend);
+                    ligTCP.textToSend = toSend;
+                    ligTCP.run();
+                    //ligUDP.sendEcho(toSend);
+                    ligUDP.sendEcho("Ping");
                 }
                 else if (!ligTCP.recieved.equals(UDPSTART) && (("2".equals(s) || "3".equals(s)))) {
                     System.out.println("There was a failrule trying to start the UDP client");

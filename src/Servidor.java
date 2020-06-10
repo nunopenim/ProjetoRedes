@@ -69,31 +69,25 @@ public class Servidor {
                         case "2":
                         case "3":
                             ps.print(UDPSTART);
-                            UDPThreads[index].recieving = true;
-                            TimeUnit.SECONDS.sleep(4);
-                            UDPThreads[index].exec();
-                            String msgRec = UDPThreads[index].recieved;
+                            //UDPThreads[index].recieving = true;
+                            //UDPThreads[index].exec();
+                            //String msgRec = UDPThreads[index].recieved;
+                            String msgRec = br.readLine() + "|" + socket.getInetAddress().toString().split("/")[1] + "|" + socket.getPort();
                             System.out.println("Diagnostics: Message '" + msgRec+"' was recieved");
-                            if (msgRec == null) {
-                                break;
-                            }
                             String[] args = msgRec.split("\\|");
                             String mensagem = args[0];
                             String origem = args[2];
                             String destino = args[1];
+                            UDPThreads[index].recievedStr();
                             //System.out.println(args[1]);
                             //System.out.println(destino);
                             //System.out.println(destino.equals("all "));
                             if (destino.equals("all")) {
-                                for (UDPServer u : UDPThreads) {
-                                    if (u != null) {
-                                        for (String s : getUsers()) {
-                                            u.toSend = "Mensagem de " + origem + ": " + mensagem;
-                                            u.destiny = s.split(" - ")[1];
-                                            u.sending = true;
-                                            u.exec();
-                                        }
-                                    }
+                                for (String s : getUsers()) {
+                                    UDPThreads[index].toSend = "Mensagem de " + origem + ": " + mensagem;
+                                    UDPThreads[index].destiny = s.split(" - ")[1];
+                                    UDPThreads[index].sending = true;
+                                    UDPThreads[index].exec();
                                 }
                             }
                             else {
@@ -151,10 +145,10 @@ public class Servidor {
                             ps.println(ret);
                             break;
                     }
-                    //ps.flush(); //IMPORTANTE
+                    ps.flush(); //IMPORTANTE
                 }
                 //socket.close();
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }

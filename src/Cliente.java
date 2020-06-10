@@ -3,11 +3,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.*;
-import java.sql.Array;
-import java.sql.Time;
 import java.util.Arrays;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 
 public class Cliente {
 
@@ -131,8 +128,20 @@ public class Cliente {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        UDPConnection ligUDP = new UDPConnection("localhost", 9031);
-        TCPConnection ligTCP = new TCPConnection("localhost", 6500);
+        BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+        System.out.print("Introduza o endereço do servidor> ");
+        String opt = bufferRead.readLine();
+        System.out.print("Introduza a porta UDP> ");
+        String portRead = bufferRead.readLine();
+        int portUDP = 9031;
+        try {
+            portUDP = Integer.parseInt(portRead);
+        }
+        catch (Exception e) {
+            System.out.println("Porta inválida, a assumir 9031");
+        }
+        UDPConnection ligUDP = new UDPConnection(opt, portUDP);
+        TCPConnection ligTCP = new TCPConnection(opt, 6500);
         Thread udpThread = new Thread(ligUDP);
         //udpThread.start();
         boolean exit = false;
@@ -143,7 +152,7 @@ public class Cliente {
         while(!exit){
             System.out.println();
             System.out.print("Opção? ");
-            BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
+            bufferRead = new BufferedReader(new InputStreamReader(System.in));
             String s = bufferRead.readLine();
             if ("0".equals(s)) { //mostrar menu, continuar
                 menu();

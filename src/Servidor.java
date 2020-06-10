@@ -102,17 +102,22 @@ public class Servidor {
                             } else {
                                 int person = 0;
                                 boolean invalid = false;
+                                boolean changed = false;
                                 for (String s : getUsers()) {
                                     if (s.startsWith(args[1] + " ")) {
                                         try {
                                             person = Integer.parseInt(s.split(" - ")[0]);
+                                            changed = true;
                                         } catch (Exception e) {
                                             invalid = true;
                                         }
                                     }
                                 }
-                                if (invalid) {
-                                    System.out.println("Diagnostics: destination is null!!");
+                                if (invalid || !changed) {
+                                    System.out.println("Diagnostics: destination is not valid!!");
+                                    UDPThreads[index].toSend = "O utilizador de destino é inválido!";
+                                    UDPThreads[person].sending = true;
+                                    UDPThreads[person].run();
                                 } else {
                                     //UDPThreads[0].destinyPort = UDPThreads[0].port;
                                     UDPThreads[person].toSend = "Mensagem de " + origem + ": " + mensagem;

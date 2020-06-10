@@ -42,12 +42,14 @@ public class Servidor {
             ServerSocket server = null;
             try {
                 System.out.println("TCP Server connected");
+                BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintStream ps = new PrintStream(socket.getOutputStream());
                 ps.println(UDPThreads[index].port);
-                ps.flush();
+                //br.readLine();
+                //ps.flush();
                 //UDPThreads[index] = new UDPServer(9031);
                 while (true) {
-                    BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    //ps.flush();
                     ps = new PrintStream(socket.getOutputStream());
                     String linha = br.readLine();
                     System.out.println("Diagnostics: " + linha + " was recieved");
@@ -60,7 +62,7 @@ public class Servidor {
                         case "99":
                             ret = ENDCONNECTION;
                             ps.println(ret);
-                            ps.flush();
+                            //ps.flush();
                             break;
                         case "1":
                             ret = "";
@@ -74,7 +76,7 @@ public class Servidor {
                         case "2":
                         case "3":
                             ps.print(UDPSTART);
-                            ps.flush();
+                            //ps.flush();
                             //UDPThreads[index].recieving = true;
                             //UDPThreads[index].exec();
                             //String msgRec = UDPThreads[index].recieved;
@@ -142,13 +144,15 @@ public class Servidor {
                                 Scanner myReader = new Scanner(myObj);
                                 while (myReader.hasNextLine()) {
                                     String data = myReader.nextLine();
-                                    ret += data + System.getProperty("line.separator");
+                                    ret += data + "\n";
                                 }
                                 myReader.close();
                                 ps.println(ret);
+                                //ps.flush();
                             } catch (FileNotFoundException e) {
                                 ret = "The blacklist file doesn't exist on this server!";
                                 ps.println(ret);
+                                //ps.flush();
                             }
                             break;
                         default:
@@ -156,7 +160,7 @@ public class Servidor {
                             ps.println(ret);
                             break;
                     }
-                    ps.flush(); //IMPORTANTE
+                    //ps.flush(); //IMPORTANTE
                 }
                 socket.close();
                 threadsTCP[index] = null;

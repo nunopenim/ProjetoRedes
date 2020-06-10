@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.*;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 public class Cliente {
 
@@ -42,6 +43,7 @@ public class Cliente {
             }
             while (br.ready()) {
                 line = br.readLine();
+                TimeUnit.MILLISECONDS.sleep(1); //não perguntem... é para sincronizar
                 text += line + "\n";
             }
             return text;
@@ -193,7 +195,7 @@ public class Cliente {
             else {
                 if (ligTCP.recieved != null) {
                     System.out.print(ligTCP.recieved);
-                    ligTCP.recieved = "";
+                    ligTCP.recieved = null;
                 }
             }
         }

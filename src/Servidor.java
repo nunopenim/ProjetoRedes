@@ -42,15 +42,20 @@ public class Servidor {
             ServerSocket server = null;
             try {
                 System.out.println("TCP Server connected");
+                PrintStream ps = new PrintStream(socket.getOutputStream());
+                ps.println(UDPThreads[index].port);
+                ps.flush();
                 //UDPThreads[index] = new UDPServer(9031);
                 while (true) {
                     BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    PrintStream ps = new PrintStream(socket.getOutputStream());
-                    ps.println(UDPThreads[index].port);
+                    ps = new PrintStream(socket.getOutputStream());
                     String linha = br.readLine();
                     System.out.println("Diagnostics: " + linha + " was recieved");
                     //UDPThreads[index].recievedStr();
                     String ret = "Ping!";
+                    if (linha == null) {
+                        break;
+                    }
                     switch (linha) {
                         case "99":
                             ret = ENDCONNECTION;
@@ -74,7 +79,7 @@ public class Servidor {
                             //UDPThreads[index].exec();
                             //String msgRec = UDPThreads[index].recieved;
                             String msgRec = br.readLine() + "|" + socket.getInetAddress().toString().split("/")[1] + "|" + socket.getPort();
-                            System.out.println("Diagnostics: Message '" + msgRec+"' was recieved");
+                            System.out.println("Diagnostics: Message '" + msgRec + "' was recieved");
                             String[] args = msgRec.split("\\|");
                             String mensagem = args[0];
                             String origem = args[2];
@@ -84,7 +89,7 @@ public class Servidor {
                             //System.out.println(destino.equals("all "));
                             if (destino.equals("all")) {
                                 for (UDPServer t : UDPThreads) {
-                                    if(t == null) {
+                                    if (t == null) {
                                         continue;
                                     }
                                     t.toSend = "Mensagem de " + origem + ": " + mensagem;
@@ -92,24 +97,21 @@ public class Servidor {
                                     t.sending = true;
                                     t.run();
                                 }
-                            }
-                            else {
+                            } else {
                                 int person = 0;
                                 boolean invalid = false;
                                 for (String s : getUsers()) {
                                     if (s.startsWith(args[1] + " ")) {
                                         try {
                                             person = Integer.parseInt(s.split(" - ")[0]);
-                                        }
-                                        catch (Exception e){
+                                        } catch (Exception e) {
                                             invalid = true;
                                         }
                                     }
                                 }
                                 if (invalid) {
                                     System.out.println("Diagnostics: destination is null!!");
-                                }
-                                else {
+                                } else {
                                     //UDPThreads[0].destinyPort = UDPThreads[0].port;
                                     UDPThreads[person].toSend = "Mensagem de " + origem + ": " + mensagem;
                                     UDPThreads[person].sending = true;
@@ -156,7 +158,17 @@ public class Servidor {
                     }
                     ps.flush(); //IMPORTANTE
                 }
-                //socket.close();
+                socket.close();
+                threadsTCP[index] = null;
+                threadsUDP[index] = null;
+                UDPThreads[index] = null;
+                TCPThreads[index] = null;
+            } catch (SocketException e) {
+                System.out.println("The client has disconnected unexpectedly!");
+                threadsTCP[index] = null;
+                threadsUDP[index] = null;
+                UDPThreads[index] = null;
+                TCPThreads[index] = null;
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -245,17 +257,21 @@ public class Servidor {
 
     public static void main(String[] args) throws IOException {
         ServerSocket server = new ServerSocket(6500);
-        for (int i = 0; i < threadsTCP.length; i++) {
-            Socket socket = server.accept();
-            TCPThreads[i] = new TCPServer(i, socket);
-            UDPThreads[i] = new UDPServer(9031+i);
-            UDPThreads[i].destiny = (((InetSocketAddress) socket.getRemoteSocketAddress()).getAddress()).toString().replace("/", "");
-            //UDPThreads[i].recieving = true;
-            //UDPThreads[i].exec();
-            threadsTCP[i] = new Thread(TCPThreads[i]);
-            threadsUDP[i] = new Thread(UDPThreads[i]);
-            threadsTCP[i].start();
-            threadsUDP[i].start();
+        while (true) {
+            for (int i = 0; i < threadsTCP.length; i++) {
+                if (TCPThreads[i] == null) {
+                    Socket socket = server.accept();
+                    TCPThreads[i] = new TCPServer(i, socket);
+                    UDPThreads[i] = new UDPServer(9031+i);
+                    UDPThreads[i].destiny = (((InetSocketAddress) socket.getRemoteSocketAddress()).getAddress()).toString().replace("/", "");
+                    //UDPThreads[i].recieving = true;
+                    //UDPThreads[i].exec();
+                    threadsTCP[i] = new Thread(TCPThreads[i]);
+                    threadsUDP[i] = new Thread(UDPThreads[i]);
+                    threadsTCP[i].start();
+                    threadsUDP[i].start();
+                }
+            }
         }
     }
 }

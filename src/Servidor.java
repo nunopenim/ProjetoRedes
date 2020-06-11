@@ -296,9 +296,9 @@ public class Servidor {
                     String[] listaNegra = null;
                     if (listaBrancaCorrida.equals("The whitelist file doesn't exist on this server!")) {
                         listaBrancaValida = false;
-                        legal = false;
                     }
                     else{
+                        legal = false;
                         listaBranca = listaBrancaCorrida.split("\n");
                     }
                     if (listaNegraCorrida.equals("The blacklist file doesn't exist on this server!")) {
@@ -312,6 +312,7 @@ public class Servidor {
                         for (String s : listaBranca) {
                             if (s != null && s.equals(ip)) {
                                 legal = true;
+                                break;
                             }
                         }
                     }
@@ -319,6 +320,7 @@ public class Servidor {
                         for (String s : listaNegra) {
                             if (s != null && s.equals(ip)) {
                                 legal = false;
+                                break;
                             }
                         }
                     }

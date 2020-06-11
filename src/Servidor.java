@@ -116,8 +116,8 @@ public class Servidor {
                                 if (invalid || !changed) {
                                     System.out.println("Diagnostics: destination is not valid!!");
                                     UDPThreads[index].toSend = "O utilizador de destino é inválido!";
-                                    UDPThreads[person].sending = true;
-                                    UDPThreads[person].run();
+                                    UDPThreads[index].sending = true;
+                                    UDPThreads[index].run();
                                 } else {
                                     //UDPThreads[0].destinyPort = UDPThreads[0].port;
                                     UDPThreads[person].toSend = "Mensagem de " + origem + ": " + mensagem;

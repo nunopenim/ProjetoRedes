@@ -43,7 +43,7 @@ public class Cliente {
             }
             while (br.ready()) {
                 line = br.readLine();
-                TimeUnit.MILLISECONDS.sleep(1); //não perguntem... é para sincronizar
+                TimeUnit.MILLISECONDS.sleep(1);
                 text += line + "\n";
             }
             return text;

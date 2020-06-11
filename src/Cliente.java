@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 public class Cliente {
 
     public static final String ENDCONNECTION = "Servidor.fim\n";
-
+    public static final String BLOCKED = "Servidor.ilegal\n";
     public static final String UDPSTART = "Servidor.udp\n";
 
     public static class TCPConnection implements Runnable{
@@ -136,6 +136,10 @@ public class Cliente {
         boolean exit = false;
         ligTCP.open();
         String porta = ligTCP.recieve();
+        if (porta.equals(BLOCKED)) {
+            System.out.println("Este endereço IP está bloqueado no servidor!");
+            System.exit(0);
+        }
         int portUDP = Integer.parseInt(porta.replace("\n", ""));
         UDPConnection ligUDP = new UDPConnection(opt, portUDP);
         Thread udpThread = new Thread(ligUDP);

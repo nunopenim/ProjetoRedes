@@ -13,16 +13,52 @@ public class Servidor {
 
     public static final String ENDCONNECTION = "Servidor.fim";
     public static final String UDPSTART = "Servidor.udp\n";
+    public static final String BLOCKED = "Servidor.ilegal";
+
+    public static String readWhiteList() {
+        String ret = "";
+        try {
+            File myObj = new File("files/whitelist.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                String data = myReader.nextLine();
+                ret += data + "\n";
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            ret = "The whitelist file doesn't exist on this server!";
+        }
+        return ret;
+    }
+
+    public static String readBlackList() {
+        String ret = "";
+        try {
+            File myObj = new File("files/blacklist.txt");
+            Scanner myReader = new Scanner(myObj);
+            while (myReader.hasNextLine()) {
+                String data = myReader.nextLine();
+                ret += data + "\n";
+            }
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            ret = "The blacklist file doesn't exist on this server!";
+        }
+        return ret;
+    }
 
     public static class TCPServer implements Runnable {
         //int serverPort;
         Socket socket = null;
         int index;
 
-        public TCPServer(int index, Socket sock) {
+        boolean legal;
+
+        public TCPServer(int index, Socket sock, boolean legal) {
             //this.serverPort = port;
             this.index = index;
             this.socket = sock;
+            this.legal = legal;
         }
 
         public static ArrayList<String> getUsers() {
@@ -44,11 +80,17 @@ public class Servidor {
                 System.out.println("TCP Server connected");
                 BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 PrintStream ps = new PrintStream(socket.getOutputStream());
-                ps.println(UDPThreads[index].port);
+                if (legal) {
+                    ps.println(UDPThreads[index].port);
+                }
+                else {
+                    ps.println(BLOCKED);
+                    System.out.println("An illegal client was detected!");
+                }
                 //br.readLine();
                 //ps.flush();
                 //UDPThreads[index] = new UDPServer(9031);
-                while (true) {
+                while (legal) {
                     //ps.flush();
                     ps = new PrintStream(socket.getOutputStream());
                     String linha = br.readLine();
@@ -127,38 +169,12 @@ public class Servidor {
                             }
                             break;
                         case "4":
-                            try {
-                                ret = "";
-                                File myObj = new File("files/whitelist.txt");
-                                Scanner myReader = new Scanner(myObj);
-                                while (myReader.hasNextLine()) {
-                                    String data = myReader.nextLine();
-                                    ret += data + "\n";
-                                }
-                                myReader.close();
-                                ps.println(ret);
-                            } catch (FileNotFoundException e) {
-                                ret = "The whitelist file doesn't exist on this server!";
-                                ps.println(ret);
-                            }
+                            ret = readWhiteList();
+                            ps.println(ret);
                             break;
                         case "5":
-                            try {
-                                ret = "";
-                                File myObj = new File("files/blacklist.txt");
-                                Scanner myReader = new Scanner(myObj);
-                                while (myReader.hasNextLine()) {
-                                    String data = myReader.nextLine();
-                                    ret += data + "\n";
-                                }
-                                myReader.close();
-                                ps.println(ret);
-                                //ps.flush();
-                            } catch (FileNotFoundException e) {
-                                ret = "The blacklist file doesn't exist on this server!";
-                                ps.println(ret);
-                                //ps.flush();
-                            }
+                            ret = readBlackList();
+                            ps.println(ret);
                             break;
                         default:
                             ret = "Opção inválida!";
@@ -168,6 +184,7 @@ public class Servidor {
                     //ps.flush(); //IMPORTANTE
                 }
                 socket.close();
+                System.out.println("TCP Server Disconnected!");
                 threadsTCP[index] = null;
                 threadsUDP[index] = null;
                 UDPThreads[index] = null;
@@ -269,8 +286,43 @@ public class Servidor {
         while (true) {
             for (int i = 0; i < threadsTCP.length; i++) {
                 if (TCPThreads[i] == null) {
+                    boolean legal = true;
+                    boolean listaBrancaValida = true;
+                    boolean listaNegraValida = true;
                     Socket socket = server.accept();
-                    TCPThreads[i] = new TCPServer(i, socket);
+                    String listaBrancaCorrida = readWhiteList();
+                    String listaNegraCorrida = readBlackList();
+                    String[] listaBranca = null;
+                    String[] listaNegra = null;
+                    if (listaBrancaCorrida.equals("The whitelist file doesn't exist on this server!")) {
+                        listaBrancaValida = false;
+                        legal = false;
+                    }
+                    else{
+                        listaBranca = listaBrancaCorrida.split("\n");
+                    }
+                    if (listaNegraCorrida.equals("The blacklist file doesn't exist on this server!")) {
+                        listaNegraValida = false;
+                    }
+                    else {
+                         listaNegra = listaNegraCorrida.split("\n");
+                    }
+                    String ip = (((InetSocketAddress) socket.getRemoteSocketAddress()).getAddress()).toString().replace("/", "");
+                    if (listaBrancaValida) {
+                        for (String s : listaBranca) {
+                            if (s != null && s.equals(ip)) {
+                                legal = true;
+                            }
+                        }
+                    }
+                    if (listaNegraValida) {
+                        for (String s : listaNegra) {
+                            if (s != null && s.equals(ip)) {
+                                legal = false;
+                            }
+                        }
+                    }
+                    TCPThreads[i] = new TCPServer(i, socket, legal);
                     UDPThreads[i] = new UDPServer(9031+i);
                     UDPThreads[i].destiny = (((InetSocketAddress) socket.getRemoteSocketAddress()).getAddress()).toString().replace("/", "");
                     //UDPThreads[i].recieving = true;

@@ -130,11 +130,27 @@ public class Cliente {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-        System.out.print("Introduza o endereço do servidor> ");
-        String opt = bufferRead.readLine();
-        TCPConnection ligTCP = new TCPConnection(opt, 6500);
+        boolean valid = true;
         boolean exit = false;
-        ligTCP.open();
+        TCPConnection ligTCP = null;
+        String opt;
+        do {
+            System.out.print("Introduza o endereço do servidor> ");
+            opt = bufferRead.readLine();
+            try {
+                ligTCP = new TCPConnection(opt, 6500);
+                ligTCP.open();
+                valid = true;
+            }
+            catch (UnknownHostException e) {
+                valid = false;
+                System.out.println("Este host é desconhecido!");
+            }
+            catch (ConnectException e) {
+                valid = false;
+                System.out.println("Não foi possivel estabelecer ligação ao servidor.");
+            }
+        } while (!valid);
         String porta = ligTCP.recieve();
         if (porta.equals(BLOCKED)) {
             System.out.println("Este endereço IP está bloqueado no servidor!");

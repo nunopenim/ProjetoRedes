@@ -5,8 +5,10 @@ import java.util.Scanner;
 
 public class Servidor {
 
-    public static TCPServer[] TCPThreads = new TCPServer[100];
-    public static UDPServer[] UDPThreads = new UDPServer[100];
+    public static final int MAXCONNECTIONS = 100;
+
+    public static TCPServer[] TCPThreads = new TCPServer[MAXCONNECTIONS];
+    public static UDPServer[] UDPThreads = new UDPServer[MAXCONNECTIONS];
     public static Thread[] threadsTCP = new Thread[TCPThreads.length];
     public static Thread[] threadsUDP = new Thread[UDPThreads.length];
 

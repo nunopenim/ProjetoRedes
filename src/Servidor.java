@@ -65,8 +65,8 @@ public class Servidor {
                 if (t != null && t.socket != null) {
                     String ip = (((InetSocketAddress) t.socket.getRemoteSocketAddress()).getAddress()).toString().replace("/", "");
                     ret.add(count + " - " + ip);
-                    count++;
                 }
+                count++;
             }
             return ret;
         }

@@ -193,7 +193,7 @@ public class Cliente {
             }
             if (ENDCONNECTION.equals(ligTCP.recieved) || "99".equals(s)) { //server-side end connection
                 ligTCP.close();
-                udpThread.interrupt(); //necessario, senao rebenta
+                udpThread.stop(); //necessario, senao rebenta
                 ligUDP.close();
                 System.out.println("A sair");
                 System.out.println("Cliente desconectado...");

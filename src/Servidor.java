@@ -1,7 +1,6 @@
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class Servidor {
@@ -54,7 +53,6 @@ public class Servidor {
         boolean legal;
 
         public TCPServer(int index, Socket sock, boolean legal) {
-            //this.serverPort = port;
             this.index = index;
             this.socket = sock;
             this.legal = legal;
@@ -144,7 +142,6 @@ public class Servidor {
                                     UDPThreads[index].sending = true;
                                     UDPThreads[index].run();
                                 } else {
-                                    //UDPThreads[0].destinyPort = UDPThreads[0].port;
                                     UDPThreads[person].toSend = "Mensagem de " + origem + ": " + mensagem;
                                     UDPThreads[person].sending = true;
                                     UDPThreads[person].run();

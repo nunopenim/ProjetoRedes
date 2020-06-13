@@ -48,8 +48,7 @@ public class Servidor {
     }
 
     public static class TCPServer implements Runnable {
-        //int serverPort;
-        Socket socket = null;
+        Socket socket;
         int index;
 
         boolean legal;
@@ -75,7 +74,6 @@ public class Servidor {
         }
 
         public void run() {
-            ServerSocket server = null;
             try {
                 System.out.println("TCP Server connected");
                 BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -87,16 +85,11 @@ public class Servidor {
                     ps.println(BLOCKED);
                     System.out.println("An illegal client was detected!");
                 }
-                //br.readLine();
-                //ps.flush();
-                //UDPThreads[index] = new UDPServer(9031);
                 while (legal) {
-                    //ps.flush();
                     ps = new PrintStream(socket.getOutputStream());
                     String linha = br.readLine();
                     System.out.println("Diagnostics: " + linha + " was recieved");
-                    //UDPThreads[index].recievedStr();
-                    String ret = "Ping!";
+                    String ret;
                     if (linha == null) {
                         break;
                     }
@@ -104,7 +97,6 @@ public class Servidor {
                         case "99":
                             ret = ENDCONNECTION;
                             ps.println(ret);
-                            //ps.flush();
                             break;
                         case "1":
                             ret = "";
@@ -113,31 +105,22 @@ public class Servidor {
                                 ret += s + "\n";
                             }
                             ps.println(ret);
-                            //ps.flush();
                             break;
                         case "2":
                         case "3":
                             ps.print(UDPSTART);
-                            //ps.flush();
-                            //UDPThreads[index].recieving = true;
-                            //UDPThreads[index].exec();
-                            //String msgRec = UDPThreads[index].recieved;
                             String msgRec = br.readLine() + "|" + socket.getInetAddress().toString().split("/")[1] + "|" + socket.getPort();
                             System.out.println("Diagnostics: Message '" + msgRec + "' was recieved");
                             String[] args = msgRec.split("\\|");
                             String mensagem = args[0];
                             String origem = args[2];
                             String destino = args[1];
-                            //System.out.println(args[1]);
-                            //System.out.println(destino);
-                            //System.out.println(destino.equals("all "));
                             if (destino.equals("all")) {
                                 for (UDPServer t : UDPThreads) {
                                     if (t == null) {
                                         continue;
                                     }
                                     t.toSend = "Mensagem de " + origem + ": " + mensagem;
-                                    //UDPThreads[index].destiny = s.split(" - ")[1];
                                     t.sending = true;
                                     t.run();
                                 }
@@ -181,7 +164,6 @@ public class Servidor {
                             ps.println(ret);
                             break;
                     }
-                    //ps.flush(); //IMPORTANTE
                 }
                 socket.close();
                 System.out.println("TCP Server Disconnected!");
@@ -203,13 +185,10 @@ public class Servidor {
 
     public static class UDPServer implements Runnable {
         private DatagramSocket socket;
-        public boolean recieving = false;
         public boolean sending = false;
-        public String recieved = null;
         public String toSend = null;
         public String destiny = null;
         public int destinyPort;
-        private byte[] buf = new byte[256];
         private int port;
 
         public UDPServer(int port) throws SocketException {
@@ -218,64 +197,27 @@ public class Servidor {
             this.destinyPort = port;
         }
 
-        public void close() {
-            socket.close();
-        }
-
-        public String recievedStr() {
-            try {
-                Arrays.fill(buf, (byte) 0);
-                DatagramPacket packet = new DatagramPacket(buf, buf.length);
-                socket.receive(packet);
-                InetAddress address = packet.getAddress();
-                destinyPort = packet.getPort();
-                packet = new DatagramPacket(buf, buf.length, address, port);
-                String received = new String(packet.getData(), packet.getOffset(), packet.getLength());
-                int counter = 0;
-                while (counter < packet.getData().length && packet.getData()[counter] != 0) {
-                    counter++;
-                }
-                received = received.substring(0, counter) + "|" + address.toString().split("/")[1] + "|" + port; //recieved tem de ter mensagem + destino
-                return received;
-            } catch (SocketException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
 
         public void send(String data, String address) {
             try{
-                byte[] retBuf = new byte[256];
+                byte[] retBuf;
                 retBuf = data.getBytes();
                 DatagramPacket packet = new DatagramPacket(retBuf, retBuf.length, InetAddress.getByName(address), destinyPort);
                 socket.send(packet);
                 System.out.println("UDP: SENT!");
-            } catch (SocketException e) {
-                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
         public void run() {
-            //System.out.println("UDP server started on: " + port);
             exec();
         }
 
         public void exec() {
-            if (false && recieving) { //temporarily disabled
-                System.out.println("Entered");
-                this.recieved = null;
-                this.recieved = recievedStr();
-                recieving = false;
-            }
             if (sending) {
                 this.send(toSend, destiny);
                 toSend = null;
-                //destiny = null;
-                //destinyPort = port;
                 sending = false;
             }
         }
@@ -327,8 +269,6 @@ public class Servidor {
                     TCPThreads[i] = new TCPServer(i, socket, legal);
                     UDPThreads[i] = new UDPServer(9031+i);
                     UDPThreads[i].destiny = (((InetSocketAddress) socket.getRemoteSocketAddress()).getAddress()).toString().replace("/", "");
-                    //UDPThreads[i].recieving = true;
-                    //UDPThreads[i].exec();
                     threadsTCP[i] = new Thread(TCPThreads[i]);
                     threadsUDP[i] = new Thread(UDPThreads[i]);
                     threadsTCP[i].start();

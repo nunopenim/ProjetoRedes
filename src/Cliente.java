@@ -37,7 +37,7 @@ public class Cliente {
         }
 
         public String recieve() throws IOException, InterruptedException {
-            String line = null;
+            String line;
             String text = "";
             while (!br.ready()) {
             }
@@ -85,12 +85,6 @@ public class Cliente {
             socket.bind(sockAd);
         }
 
-        public void sendEcho(String msg) throws IOException {
-            byte[] buf = msg.getBytes();
-            DatagramPacket packet = new DatagramPacket(buf, buf.length, address, this.port);
-            socket.send(packet);
-        }
-
         public String recieveEcho() throws IOException {
             byte[] recBuf = new byte[256];
             Arrays.fill(recBuf, (byte) 0);
@@ -117,7 +111,7 @@ public class Cliente {
 
     }
 
-    public static void menu() throws IOException {
+    public static void menu() {
         System.out.println("MENU CLIENTE\n");
         System.out.println("0 - Menu Inicial");
         System.out.println("1 - Listar utilizadores online");
@@ -130,7 +124,7 @@ public class Cliente {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         BufferedReader bufferRead = new BufferedReader(new InputStreamReader(System.in));
-        boolean valid = true;
+        boolean valid;
         boolean exit = false;
         TCPConnection ligTCP = null;
         String opt;
@@ -183,19 +177,15 @@ public class Cliente {
                     System.out.println();
                     System.out.print("Mensagem? ");
                     String mensagem = bufferRead.readLine();
-                    String toSend = mensagem + "|" + destinatario;
-                    //ligUDP.sendEcho(toSend);
-                    ligTCP.textToSend = toSend;
+                    ligTCP.textToSend = mensagem + "|" + destinatario;
                     ligTCP.run();
                 }
                 else if("3".equals(s)&& ligTCP.recieved.equals(UDPSTART)){
                     System.out.println();
                     System.out.print("Mensagem? ");
                     String mensagem = bufferRead.readLine();
-                    String toSend = mensagem + "|" + "all";
-                    ligTCP.textToSend = toSend;
+                    ligTCP.textToSend = mensagem + "|" + "all";
                     ligTCP.run();
-                    //ligUDP.sendEcho(toSend);
                 }
                 else if (!ligTCP.recieved.equals(UDPSTART) && (("2".equals(s) || "3".equals(s)))) {
                     System.out.println("There was a failrule trying to start the UDP client");
@@ -203,7 +193,7 @@ public class Cliente {
             }
             if (ENDCONNECTION.equals(ligTCP.recieved) || "99".equals(s)) { //server-side end connection
                 ligTCP.close();
-                udpThread.stop(); //necessario, senao rebenta
+                udpThread.interrupt(); //necessario, senao rebenta
                 ligUDP.close();
                 System.out.println("A sair");
                 System.out.println("Cliente desconectado...");

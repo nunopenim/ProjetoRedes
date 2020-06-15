@@ -224,6 +224,7 @@ public class Servidor {
 
     public static void main(String[] args) throws IOException {
         ServerSocket server = new ServerSocket(6500);
+        System.out.println("Servidor ligado");
         while (true) {
             for (int i = 0; i < threadsTCP.length; i++) {
                 if (TCPThreads[i] == null) {
